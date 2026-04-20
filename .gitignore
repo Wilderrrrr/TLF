@@ -1,0 +1,19 @@
+# Dependencias (Evita pesos innecesarios)
+node_modules/
+client/node_modules/
+
+# Entorno y variables secretas (Crucial para seguridad)
+.env
+.env.*
+
+# Build artifacts (Generados automáticamente)
+client/dist/
+
+# Logs del servidor
+logs
+*.log
+npm-debug.log*
+
+# Archivos de la máquina/sistema
+.DS_Store
+Thumbs.db
