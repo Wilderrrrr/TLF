@@ -4,7 +4,7 @@ import { UserPlus, Search, Shield, User, Mail, MoreVertical, Pencil, Trash2, Che
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 
-const API_BASE = 'http://localhost:3000/api/users';
+const API_BASE = '/api/users';
 
 const UsersView = () => {
   const [users, setUsers] = useState([]);

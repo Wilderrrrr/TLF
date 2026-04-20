@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
 const errorMiddleware = require('./middlewares/error.middleware');
@@ -43,6 +44,16 @@ app.use('/api/clients', authMiddleware, clientsRoutes);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
+
+// Servir archivos estáticos del Cliente (React) en producción
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/dist')));
+
+  // Cualquier otra ruta que no sea API, sirve el index.html de React
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
+  });
+}
 
 // Capturar 404 para rutas no existentes
 app.use((req, res) => {

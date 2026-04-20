@@ -9,7 +9,7 @@ import Calendar from './Calendar';
 import StatsBar from './StatsBar';
 import Pagination from './Pagination';
 
-const API_BASE = 'http://localhost:3000/api/finance';
+const API_BASE = '/api/finance';
 
 const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
   <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all duration-300 group">
@@ -73,8 +73,8 @@ const FinanceDashboard = () => {
         axios.get(API_BASE),
         axios.get(`${API_BASE}/summary`),
         axios.get(`${API_BASE}/stats`),
-        axios.get('http://localhost:3000/api/settings'),
-        axios.get('http://localhost:3000/api/clients')
+        axios.get('/api/settings'),
+        axios.get('/api/clients')
       ]);
       setMovements(movRes.data.data);
       setSummary(sumRes.data.data);
@@ -82,7 +82,7 @@ const FinanceDashboard = () => {
       setConfig(configRes.data.data);
       setClients(clientRes.data.data);
 
-      const prodRes = await axios.get('http://localhost:3000/api/products');
+      const prodRes = await axios.get('/api/products');
       setAllProducts(prodRes.data.data);
 
       setLoading(false);

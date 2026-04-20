@@ -4,7 +4,7 @@ import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, ChevronRight, Che
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 
-const API_BASE = 'http://localhost:3000/api/products';
+const API_BASE = '/api/products';
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
   const manejaStock = product.maneja_stock === 1 || product.maneja_stock === true;

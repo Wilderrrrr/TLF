@@ -25,9 +25,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [token]);
 
+  const API_URL = import.meta.env.MODE === 'development' 
+    ? '' 
+    : '';
+
   const login = async (usuario, password) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         usuario,
         password
       });

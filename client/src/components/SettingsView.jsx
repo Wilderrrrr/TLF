@@ -5,7 +5,7 @@ import LoadingSpinner from './LoadingSpinner';
 import Pagination from './Pagination';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE = 'http://localhost:3000/api/settings';
+const API_BASE = '/api/settings';
 
 const SettingsView = () => {
   const [config, setConfig] = useState(null);

@@ -13,7 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 
-const API_ANALYTICS = 'http://localhost:3000/api/finance/analytics';
+const API_ANALYTICS = '/api/finance/analytics';
 
 const StatCard = ({ title, value, subValue, icon: Icon, trend, color }) => (
   <motion.div 
@@ -50,7 +50,7 @@ const DashboardView = () => {
     try {
       const [analyticsRes, lowStockRes] = await Promise.all([
         axios.get(`${API_ANALYTICS}?days=${range}`),
-        axios.get('http://localhost:3000/api/products/low-stock')
+        axios.get('/api/products/low-stock')
       ]);
       setData(analyticsRes.data.data);
       setLowStock(lowStockRes.data.data);

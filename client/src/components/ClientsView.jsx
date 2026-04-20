@@ -4,7 +4,7 @@ import { UserPlus, Search, User, Phone, Wallet, MoreVertical, Pencil, Trash2, Ch
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 
-const API_BASE = 'http://localhost:3000/api/clients';
+const API_BASE = '/api/clients';
 
 const ClientsView = () => {
     const [clients, setClients] = useState([]);
@@ -131,7 +131,7 @@ const ClientsView = () => {
             const amount = Number(client.deuda);
             if (amount <= 0) return;
 
-            await axios.post('http://localhost:3000/api/finance', {
+            await axios.post('/api/finance', {
                 tipo: 'abono',
                 monto: amount,
                 descripcion: `${client.nombre} - Salda deuda total`,
