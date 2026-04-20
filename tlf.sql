@@ -56,6 +56,9 @@ CREATE TABLE productos (
     descripcion TEXT,
     precio DECIMAL(10, 2) NOT NULL,
     stock INT DEFAULT 0,
+    stock_minimo INT DEFAULT NULL,
+    maneja_stock BOOLEAN DEFAULT TRUE,
+    activo TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

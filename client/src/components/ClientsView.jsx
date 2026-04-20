@@ -6,6 +6,12 @@ import LoadingSpinner from './LoadingSpinner';
 
 const API_BASE = '/api/clients';
 
+const getLocalDateString = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
+};
+
 const ClientsView = () => {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -135,7 +141,7 @@ const ClientsView = () => {
                 tipo: 'abono',
                 monto: amount,
                 descripcion: `${client.nombre} - Salda deuda total`,
-                fecha: new Date().toISOString().split('T')[0],
+                fecha: getLocalDateString(),
                 cliente_id: client.id
             });
 

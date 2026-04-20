@@ -11,6 +11,19 @@ import Pagination from './Pagination';
 
 const API_BASE = '/api/finance';
 
+const getLocalDateString = () => {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().split('T')[0];
+};
+
+const mapBackendDate = (dateStr) => {
+  if (!dateStr) return dateStr;
+  let dStr = dateStr;
+  if (dateStr instanceof Date) dStr = dateStr.toISOString();
+  return dStr.substring(0, 10) + 'T12:00:00';
+};
+
 const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
   <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all duration-300 group">
     <div className="flex justify-between items-start mb-4">
@@ -48,7 +61,7 @@ const FinanceDashboard = () => {
     tipo: 'venta',
     monto: '',
     descripcion: '',
-    fecha: new Date().toISOString().split('T')[0],
+    fecha: getLocalDateString(),
     productos: [] // [{ id, nombre, precio, cantidad }]
   });
   const [allProducts, setAllProducts] = useState([]);
@@ -76,8 +89,12 @@ const FinanceDashboard = () => {
         axios.get('/api/settings'),
         axios.get('/api/clients')
       ]);
-      setMovements(movRes.data.data);
-      setSummary(sumRes.data.data);
+      const mappedMovements = movRes.data.data.map(m => ({ ...m, fecha: mapBackendDate(m.fecha) }));
+      setMovements(mappedMovements);
+      
+      const mappedSummary = sumRes.data.data.map(s => ({ ...s, fecha: mapBackendDate(s.fecha) }));
+      setSummary(mappedSummary);
+      
       setStats(statRes.data.data);
       setConfig(configRes.data.data);
       setClients(clientRes.data.data);
@@ -199,7 +216,7 @@ const FinanceDashboard = () => {
         tipo: 'venta',
         monto: '',
         descripcion: '',
-        fecha: new Date().toISOString().split('T')[0],
+        fecha: getLocalDateString(),
         productos: [],
         cliente_id: null
       });
