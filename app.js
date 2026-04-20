@@ -13,18 +13,6 @@ const clientsRoutes = require('./modules/clients/clients.routes');
 
 const app = express();
 
-// Ruta de Bienvenida (Directo al punto)
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'success', 
-    message: 'API Profesional de TLF activa',
-    endpoints: {
-      finance: '/api/finance',
-      health: '/health'
-    }
-  });
-});
-
 // Middlewares Globales
 app.use(cors());
 app.use(morgan('dev'));
@@ -50,7 +38,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/dist')));
 
   // Cualquier otra ruta que no sea API, sirve el index.html de React
-  app.get('*', (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
   });
 }
