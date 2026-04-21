@@ -8,6 +8,7 @@ import LoadingSpinner from './LoadingSpinner';
 import Calendar from './Calendar';
 import StatsBar from './StatsBar';
 import Pagination from './Pagination';
+import Modal from './Modal';
 
 const API_BASE = '/api/finance';
 
@@ -483,558 +484,503 @@ const FinanceDashboard = () => {
         />
       </div>
 
-      {/* Modal - Professional implementation */}
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowModal(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl w-[95%] md:w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
-            >
-              <h3 className="text-2xl font-bold text-white mb-6">{editingId ? 'Editar Registro' : 'Nuevo Registro'}</h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex bg-slate-800 p-1.5 rounded-2xl mb-6">
-                  {['venta', 'abono', 'gasto'].map(t => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        const isClientType = t === 'venta' || t === 'abono';
-                        let newDesc = formData.descripcion;
-                        
-                        if (isClientType && formData.cliente_id) {
-                          const client = clients.find(c => c.id === formData.cliente_id);
-                          if (client && (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion.includes('- Por cobrar') || formData.descripcion.includes('- Abono'))) {
-                            newDesc = t === 'venta' ? `${client.nombre} - Por cobrar` : `${client.nombre} - Abono`;
-                          }
-                        }
-
-                        setFormData({ 
-                          ...formData, 
-                          tipo: t, 
-                          cliente_id: isClientType ? formData.cliente_id : null, 
-                          productos: t === 'venta' ? formData.productos : [],
-                          descripcion: newDesc
-                        });
-                        if (!isClientType) {
-                          setProductSearch('');
-                          setClientSearch('');
-                        }
-                      }}
-                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tipo === t
-                        ? (t === 'venta' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 
-                           t === 'abono' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' :
-                           'bg-rose-600 text-white shadow-lg shadow-rose-600/20')
-                        : 'bg-transparent text-slate-500 hover:text-slate-300'
-                        }`}
-                    >
-                      {t === 'venta' ? 'Venta' : t === 'abono' ? 'Abono' : 'Gasto'}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Buscador de Clientes (Si es Abono o Venta) */}
-                {(formData.tipo === 'venta' || formData.tipo === 'abono') && (
-                  <div className="bg-slate-800/30 p-4 rounded-2xl border border-slate-800/50 space-y-3 mb-4">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
-                        {formData.tipo === 'abono' ? 'Seleccionar Cliente' : '¿Asociar Cliente? (Opcional)'}
-                      </label>
-                      {formData.tipo === 'venta' && formData.cliente_id && (
-                        <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Venta a Crédito</span>
-                      )}
-                    </div>
-                    
-                    <div className="relative group">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={16} />
-                      <input
-                        type="text"
-                        placeholder="Buscar cliente..."
-                        value={clientSearch}
-                        onChange={(e) => setClientSearch(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-600"
-                      />
-                    </div>
-
-                    <AnimatePresence>
-                      {clientSearch && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl divide-y divide-slate-800/30 max-h-40 overflow-y-auto custom-scrollbar"
-                        >
-                          {filteredClients.map(c => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => {
-                                const newDesc = formData.tipo === 'venta' 
-                                  ? `${c.nombre} - Por cobrar` 
-                                  : (formData.tipo === 'abono' ? `${c.nombre} - Abono` : formData.descripcion);
-                                
-                                setFormData({ 
-                                  ...formData, 
-                                  cliente_id: c.id,
-                                  descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción') ? newDesc : formData.descripcion
-                                });
-                                setClientSearch('');
-                              }}
-                              className="w-full text-left px-4 py-3 hover:bg-blue-600/10 transition-colors flex justify-between items-center"
-                            >
-                              <div>
-                                <p className="text-sm font-bold text-slate-100">{c.nombre}</p>
-                                <p className="text-[10px] text-slate-500 uppercase">{c.documento || 'No Doc'}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs font-black text-rose-500">${Number(c.deuda).toLocaleString()}</p>
-                                <p className="text-[8px] text-slate-600 font-bold uppercase">Deuda</p>
-                              </div>
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {formData.cliente_id && (
-                      <div className="bg-blue-600/10 border border-blue-500/20 p-3 rounded-xl flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="p-1.5 bg-blue-600/20 rounded-lg text-blue-400">
-                            <CheckCircle size={14} />
-                          </div>
-                          <span className="text-xs font-bold text-white">{clients.find(c => c.id === formData.cliente_id)?.nombre}</span>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => { setFormData({ ...formData, cliente_id: null }); setClientSearch(''); }}
-                          className="text-slate-500 hover:text-rose-500 transition-colors"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Monto ($)</label>
-                  <input
-                    type="text"
-                    required
-                    value={formatNumber(formData.monto)}
-                    onChange={(e) => handleNumberChange('monto', e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Descripción</label>
-                  <input
-                    type="text"
-                    value={formData.descripcion}
-                    onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white"
-                  />
-                </div>
-                {formData.tipo === 'venta' && (
-                  <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <label className="text-sm font-bold text-blue-400 uppercase tracking-wider">Asociar Productos</label>
-                    </div>
-
-                    {/* Buscador de Productos Premium */}
-                    <div className="space-y-4">
-                      <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={18} />
-                        <input
-                          type="text"
-                          placeholder="Buscar producto a vender..."
-                          value={productSearch}
-                          onChange={(e) => setProductSearch(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-all shadow-inner placeholder:text-slate-600"
-                        />
-                      </div>
-
-                      <AnimatePresence>
-                        {productSearch && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl divide-y divide-slate-800/50 max-h-60 overflow-y-auto custom-scrollbar"
-                          >
-                            {allProducts.filter(p => 
-                              p.nombre.toLowerCase().includes(productSearch.toLowerCase()) || 
-                              (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
-                            ).length > 0 ? (
-                              allProducts.filter(p => 
-                                p.nombre.toLowerCase().includes(productSearch.toLowerCase()) || 
-                                (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
-                              ).slice(0, 10).map(p => (
-                                <button
-                                  key={p.id}
-                                  type="button"
-                                  disabled={formData.productos.some(sp => sp.id === p.id)}
-                                  onClick={() => {
-                                    handleAddProductToSale(p.id);
-                                    setProductSearch('');
-                                  }}
-                                  className="w-full text-left px-5 py-3 hover:bg-blue-600/10 flex justify-between items-center transition-all disabled:opacity-40 disabled:grayscale group"
-                                >
-                                  <div className="min-w-0 mr-4">
-                                    <p className="text-sm font-bold text-slate-100 group-hover:text-blue-400 transition-colors truncate">{p.nombre}</p>
-                                    <p className="text-[10px] text-slate-500 uppercase tracking-tighter">
-                                      {p.maneja_stock ? `Stock: ${p.stock}` : 'Servicio/Ilimitado'}
-                                    </p>
-                                  </div>
-                                  <div className="text-right flex-shrink-0">
-                                    <p className="text-emerald-400 font-black text-sm">${Number(p.precio).toLocaleString()}</p>
-                                    <p className="text-[8px] text-slate-600 uppercase font-bold">Precio Unitario</p>
-                                  </div>
-                                </button>
-                              ))
-                            ) : (
-                              <div className="p-8 text-center bg-slate-950/20">
-                                <AlertTriangle className="mx-auto mb-2 text-slate-700" size={24} />
-                                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">
-                                  No hay coincidencias
-                                </p>
-                              </div>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    {/* Lista de Productos Seleccionados */}
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar pt-2 border-t border-slate-800/50">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Items en la venta</span>
-                        {formData.productos.length > 0 && (
-                          <span className="text-[10px] font-black text-blue-500 uppercase">{formData.productos.length} productos</span>
-                        )}
-                      </div>
-                      {formData.productos.map(p => (
-                        <motion.div 
-                          layout
-                          initial={{ x: -10, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          key={p.id} 
-                          className="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-slate-800 shadow-sm"
-                        >
-                          <div className="flex-1 min-w-0 mr-3">
-                            <p className="text-xs font-bold text-white truncate">{p.nombre}</p>
-                            <p className="text-[10px] text-slate-500">${Number(p.precio).toLocaleString()} c/u</p>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2">
-                              <span className="text-[10px] text-slate-500 mr-2 font-bold uppercase">Cant:</span>
-                              <input
-                                type="text"
-                                required
-                                value={formatNumber(p.cantidad)}
-                                onChange={(e) => handleUpdateProductQty(p.id, e.target.value.replace(/\D/g, ''))}
-                                className="w-12 bg-transparent py-1 text-center text-xs text-white font-bold focus:outline-none"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveProductFromSale(p.id)}
-                              className="text-slate-600 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                      {formData.productos.length === 0 && (
-                        <div className="py-8 text-center border-2 border-dashed border-slate-800 rounded-2xl bg-slate-950/20">
-                          <p className="text-xs text-slate-600 font-medium">Búsca productos para agregarlos a la venta</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                <div className="pt-6 flex space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 py-3 rounded-xl font-bold transition-all"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20"
-                  >
-                    Guardar
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Day Details Modal (Premium List) */}
-      <AnimatePresence>
-        {showDayModal && selectedDate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowDayModal(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl w-[95%] md:w-full max-w-lg shadow-2xl max-h-[85vh] flex flex-col"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white tracking-tight">
-                    {format(selectedDate, 'eeee d', { locale: es })}
-                  </h3>
-                  <p className="text-slate-500 text-sm capitalize">
-                    {format(selectedDate, 'MMMM yyyy', { locale: es })}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowDayModal(false)}
-                  className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-                {movements.filter(m => isSameDay(new Date(m.fecha), selectedDate)).length === 0 ? (
-                  <div className="py-12 text-center">
-                    <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600">
-                      <CalendarIcon size={32} />
-                    </div>
-                    <p className="text-slate-400 font-medium">No hay registros para este día</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {movements
-                      .filter(m => isSameDay(new Date(m.fecha), selectedDate))
-                      .map((item) => (
-                        <div 
-                          key={item.id} 
-                          className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between group hover:border-slate-600 transition-all"
-                        >
-                          <div className="flex items-center space-x-4 min-w-0">
-                            <div className={`p-2 rounded-xl bg-opacity-10 flex-shrink-0 ${
-                              item.tipo === 'venta' 
-                                ? (item.cliente_id ? 'bg-amber-500 text-amber-400' : 'bg-emerald-500 text-emerald-400')
-                                : (item.tipo === 'abono' ? 'bg-blue-500 text-blue-400' : 'bg-rose-500 text-rose-400')
-                            }`}>
-                              {item.tipo === 'venta' || item.tipo === 'abono' ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-white truncate">
-                                {item.descripcion || (item.tipo === 'venta' ? 'Venta de productos' : (item.tipo === 'abono' ? 'Abono de cliente' : 'Gasto registrado'))}
-                              </p>
-                              <p className={`text-xs font-bold ${
-                                item.tipo === 'gasto' ? 'text-rose-400' : 
-                                (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
-                              }`}>
-                                {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-1 transition-all">
-                            <button
-                              onClick={() => {
-                                handleEdit(item);
-                                // setShowDayModal(false); // Mantener abierto o cerrar segun prefiera
-                              }}
-                              className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
-                            >
-                              <Pencil size={14} />
-                            </button>
-                            <button
-                              onClick={() => setShowDeleteConfirm(item.id)}
-                              className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))
+      {/* Main Modal - Professional implementation */}
+      <Modal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)}
+        maxWidth="max-w-md"
+      >
+        <h3 className="text-2xl font-bold text-white mb-6">{editingId ? 'Editar Registro' : 'Nuevo Registro'}</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex bg-slate-800 p-1.5 rounded-2xl mb-6">
+            {['venta', 'abono', 'gasto'].map(t => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => {
+                  const isClientType = t === 'venta' || t === 'abono';
+                  let newDesc = formData.descripcion;
+                  
+                  if (isClientType && formData.cliente_id) {
+                    const client = clients.find(c => c.id === formData.cliente_id);
+                    if (client && (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion.includes('- Por cobrar') || formData.descripcion.includes('- Abono'))) {
+                      newDesc = t === 'venta' ? `${client.nombre} - Por cobrar` : `${client.nombre} - Abono`;
                     }
-                  </div>
+                  }
+
+                  setFormData({ 
+                    ...formData, 
+                    tipo: t, 
+                    cliente_id: isClientType ? formData.cliente_id : null, 
+                    productos: t === 'venta' ? formData.productos : [],
+                    descripcion: newDesc
+                  });
+                  if (!isClientType) {
+                    setProductSearch('');
+                    setClientSearch('');
+                  }
+                }}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tipo === t
+                  ? (t === 'venta' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 
+                      t === 'abono' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' :
+                      'bg-rose-600 text-white shadow-lg shadow-rose-600/20')
+                  : 'bg-transparent text-slate-500 hover:text-slate-300'
+                  }`}
+              >
+                {t === 'venta' ? 'Venta' : t === 'abono' ? 'Abono' : 'Gasto'}
+              </button>
+            ))}
+          </div>
+
+          {/* Buscador de Clientes (Si es Abono o Venta) */}
+          {(formData.tipo === 'venta' || formData.tipo === 'abono') && (
+            <div className="bg-slate-800/30 p-4 rounded-2xl border border-slate-800/50 space-y-3 mb-4">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                  {formData.tipo === 'abono' ? 'Seleccionar Cliente' : '¿Asociar Cliente? (Opcional)'}
+                </label>
+                {formData.tipo === 'venta' && formData.cliente_id && (
+                  <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Venta a Crédito</span>
                 )}
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-slate-800 space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-2xl">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
-                      <TrendingUp size={10} className="mr-1" /> Ingresos Hoy
-                    </p>
-                    <p className="text-lg font-black text-emerald-400">
-                      ${movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono'))
-                        .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-amber-500/5 border border-amber-500/10 p-3 rounded-2xl">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
-                      <Wallet size={10} className="mr-1" /> Fiados Hoy
-                    </p>
-                    <p className="text-lg font-black text-amber-400">
-                      ${movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && (m.tipo === 'venta' && m.cliente_id))
-                        .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-rose-500/5 border border-rose-500/10 p-3 rounded-2xl">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
-                      <TrendingDown size={10} className="mr-1" /> Gastos
-                    </p>
-                    <p className="text-lg font-black text-rose-400">
-                      ${movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && m.tipo === 'gasto')
-                        .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-center sm:text-left">
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-widest mb-1">Balance Neto Real</p>
-                    <p className={`text-2xl font-black ${
-                      movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
-                        .reduce((acc, m) => {
-                          if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
-                          if (m.tipo === 'gasto') return acc - Number(m.monto);
-                          return acc;
-                        }, 0) >= 0 
-                        ? 'text-emerald-400' : 'text-rose-400'
-                    }`}>
-                      ${movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
-                          .reduce((acc, m) => {
-                            if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
-                            if (m.tipo === 'gasto') return acc - Number(m.monto);
-                            return acc;
-                          }, 0)
-                          .toLocaleString()}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setEditingId(null);
-                      setFormData({
-                        tipo: 'venta',
-                        monto: '',
-                        descripcion: '',
-                        fecha: format(selectedDate, 'yyyy-MM-dd'),
-                        productos: []
-                      });
-                      setShowModal(true);
-                    }}
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 font-bold"
-                  >
-                    <Plus size={20} />
-                    <span>Nuevo Movimiento</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Delete Confirmation Modal (Premium) */}
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowDeleteConfirm(null)}
-              className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl w-[95%] md:w-full max-w-sm shadow-2xl text-center max-h-[90vh] overflow-y-auto custom-scrollbar"
-            >
-              <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertTriangle size={32} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">¿Confirmar eliminación?</h3>
-              <p className="text-slate-400 text-sm mb-8">Esta acción no se puede deshacer. Los datos se borrarán permanentemente del sistema.</p>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowDeleteConfirm(null)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 rounded-xl font-bold transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="flex-1 bg-rose-600 hover:bg-rose-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/20"
-                >
-                  Sí, eliminar
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      {/* Feedback Modal (Premium Alert Replacement) */}
-      <AnimatePresence>
-        {feedbackModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setFeedbackModal(null)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-slate-900 border border-slate-800 p-8 rounded-3xl w-[95%] md:w-full max-w-sm shadow-2xl text-center"
-            >
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
-                feedbackModal.type === 'error' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
-              }`}>
-                {feedbackModal.type === 'error' ? <AlertTriangle size={32} /> : <CheckCircle size={32} />}
               </div>
               
-              <h3 className="text-xl font-bold text-white mb-2">{feedbackModal.title}</h3>
-              <p className="text-slate-400 text-sm mb-8 leading-relaxed">{feedbackModal.message}</p>
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={16} />
+                <input
+                  type="text"
+                  placeholder="Buscar cliente..."
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-600"
+                />
+              </div>
 
-              <button
-                onClick={() => setFeedbackModal(null)}
-                className={`w-full py-3 rounded-xl font-bold transition-all shadow-lg ${
-                  feedbackModal.type === 'error' 
-                    ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20' 
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
-                }`}
-              >
-                Entendido
-              </button>
-            </motion.div>
+              <AnimatePresence>
+                {clientSearch && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl divide-y divide-slate-800/30 max-h-40 overflow-y-auto custom-scrollbar"
+                  >
+                    {filteredClients.map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => {
+                          const newDesc = formData.tipo === 'venta' 
+                            ? `${c.nombre} - Por cobrar` 
+                            : (formData.tipo === 'abono' ? `${c.nombre} - Abono` : formData.descripcion);
+                          
+                          setFormData({ 
+                            ...formData, 
+                            cliente_id: c.id,
+                            descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción') ? newDesc : formData.descripcion
+                          });
+                          setClientSearch('');
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-blue-600/10 transition-colors flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-slate-100">{c.nombre}</p>
+                          <p className="text-[10px] text-slate-500 uppercase">{c.documento || 'No Doc'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-black text-rose-500">${Number(c.deuda).toLocaleString()}</p>
+                          <p className="text-[8px] text-slate-600 font-bold uppercase">Deuda</p>
+                        </div>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {formData.cliente_id && (
+                <div className="bg-blue-600/10 border border-blue-500/20 p-3 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-blue-600/20 rounded-lg text-blue-400">
+                      <CheckCircle size={14} />
+                    </div>
+                    <span className="text-xs font-bold text-white">{clients.find(c => c.id === formData.cliente_id)?.nombre}</span>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => { setFormData({ ...formData, cliente_id: null }); setClientSearch(''); }}
+                    className="text-slate-500 hover:text-rose-500 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Monto ($)</label>
+            <input
+              type="text"
+              required
+              value={formatNumber(formData.monto)}
+              onChange={(e) => handleNumberChange('monto', e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white"
+            />
           </div>
-        )}
-      </AnimatePresence>
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Descripción</label>
+            <input
+              type="text"
+              value={formData.descripcion}
+              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white"
+            />
+          </div>
+          {formData.tipo === 'venta' && (
+            <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 space-y-4">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-bold text-blue-400 uppercase tracking-wider">Asociar Productos</label>
+              </div>
+
+              {/* Buscador de Productos Premium */}
+              <div className="space-y-4">
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={18} />
+                  <input
+                    type="text"
+                    placeholder="Buscar producto a vender..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-all shadow-inner placeholder:text-slate-600"
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {productSearch && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl divide-y divide-slate-800/50 max-h-60 overflow-y-auto custom-scrollbar"
+                    >
+                      {allProducts.filter(p => 
+                        p.nombre.toLowerCase().includes(productSearch.toLowerCase()) || 
+                        (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
+                      ).length > 0 ? (
+                        allProducts.filter(p => 
+                          p.nombre.toLowerCase().includes(productSearch.toLowerCase()) || 
+                          (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
+                        ).slice(0, 10).map(p => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            disabled={formData.productos.some(sp => sp.id === p.id)}
+                            onClick={() => {
+                              handleAddProductToSale(p.id);
+                              setProductSearch('');
+                            }}
+                            className="w-full text-left px-5 py-3 hover:bg-blue-600/10 flex justify-between items-center transition-all disabled:opacity-40 disabled:grayscale group"
+                          >
+                            <div className="min-w-0 mr-4">
+                              <p className="text-sm font-bold text-slate-100 group-hover:text-blue-400 transition-colors truncate">{p.nombre}</p>
+                              <p className="text-[10px] text-slate-500 uppercase tracking-tighter">
+                                {p.maneja_stock ? `Stock: ${p.stock}` : 'Servicio/Ilimitado'}
+                              </p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-emerald-400 font-black text-sm">${Number(p.precio).toLocaleString()}</p>
+                              <p className="text-[8px] text-slate-600 uppercase font-bold">Precio Unitario</p>
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-8 text-center bg-slate-950/20">
+                          <AlertTriangle className="mx-auto mb-2 text-slate-700" size={24} />
+                          <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">
+                            No hay coincidencias
+                          </p>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Lista de Productos Seleccionados */}
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar pt-2 border-t border-slate-800/50">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Items en la venta</span>
+                  {formData.productos.length > 0 && (
+                    <span className="text-[10px] font-black text-blue-500 uppercase">{formData.productos.length} productos</span>
+                  )}
+                </div>
+                {formData.productos.map(p => (
+                  <motion.div 
+                    layout
+                    initial={{ x: -10, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    key={p.id} 
+                    className="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-slate-800 shadow-sm"
+                  >
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="text-xs font-bold text-white truncate">{p.nombre}</p>
+                      <p className="text-[10px] text-slate-500">${Number(p.precio).toLocaleString()} c/u</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2">
+                        <span className="text-[10px] text-slate-500 mr-2 font-bold uppercase">Cant:</span>
+                        <input
+                          type="text"
+                          required
+                          value={formatNumber(p.cantidad)}
+                          onChange={(e) => handleUpdateProductQty(p.id, e.target.value.replace(/\D/g, ''))}
+                          className="w-12 bg-transparent py-1 text-center text-xs text-white font-bold focus:outline-none"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProductFromSale(p.id)}
+                        className="text-slate-600 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+                {formData.productos.length === 0 && (
+                  <div className="py-8 text-center border-2 border-dashed border-slate-800 rounded-2xl bg-slate-950/20">
+                    <p className="text-xs text-slate-600 font-medium">Búsca productos para agregarlos a la venta</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="pt-6 flex space-x-3">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 py-3 rounded-xl font-bold transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20"
+            >
+              Guardar
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Day Details Modal (Premium List) */}
+      <Modal 
+        isOpen={showDayModal && !!selectedDate}
+        onClose={() => setShowDayModal(false)}
+        maxWidth="max-w-lg"
+      >
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-white tracking-tight">
+              {selectedDate && format(selectedDate, 'eeee d', { locale: es })}
+            </h3>
+            <p className="text-slate-500 text-sm capitalize">
+              {selectedDate && format(selectedDate, 'MMMM yyyy', { locale: es })}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowDayModal(false)}
+            className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+          {selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate)).length === 0 ? (
+            <div className="py-12 text-center">
+              <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600">
+                <CalendarIcon size={32} />
+              </div>
+              <p className="text-slate-400 font-medium">No hay registros para este día</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {selectedDate && movements
+                .filter(m => isSameDay(new Date(m.fecha), selectedDate))
+                .map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between group hover:border-slate-600 transition-all"
+                  >
+                    <div className="flex items-center space-x-4 min-w-0">
+                      <div className={`p-2 rounded-xl bg-opacity-10 flex-shrink-0 ${
+                        item.tipo === 'venta' 
+                          ? (item.cliente_id ? 'bg-amber-500 text-amber-400' : 'bg-emerald-500 text-emerald-400')
+                          : (item.tipo === 'abono' ? 'bg-blue-500 text-blue-400' : 'bg-rose-500 text-rose-400')
+                      }`}>
+                        {item.tipo === 'venta' || item.tipo === 'abono' ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-white truncate">
+                          {item.descripcion || (item.tipo === 'venta' ? 'Venta de productos' : (item.tipo === 'abono' ? 'Abono de cliente' : 'Gasto registrado'))}
+                        </p>
+                        <p className={`text-xs font-bold ${
+                          item.tipo === 'gasto' ? 'text-rose-400' : 
+                          (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
+                        }`}>
+                          {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1 transition-all">
+                      <button
+                        onClick={() => {
+                          handleEdit(item);
+                        }}
+                        className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(item.id)}
+                        className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-slate-800 space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-2xl">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
+                <TrendingUp size={10} className="mr-1" /> Ingresos Hoy
+              </p>
+              <p className="text-lg font-black text-emerald-400">
+                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono'))
+                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-amber-500/5 border border-amber-500/10 p-3 rounded-2xl">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
+                <Wallet size={10} className="mr-1" /> Fiados Hoy
+              </p>
+              <p className="text-lg font-black text-amber-400">
+                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && (m.tipo === 'venta' && m.cliente_id))
+                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-rose-500/5 border border-rose-500/10 p-3 rounded-2xl">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
+                <TrendingDown size={10} className="mr-1" /> Gastos
+              </p>
+              <p className="text-lg font-black text-rose-400">
+                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && m.tipo === 'gasto')
+                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-widest mb-1">Balance Neto Real</p>
+              <p className={`text-2xl font-black ${
+                selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
+                  .reduce((acc, m) => {
+                    if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
+                    if (m.tipo === 'gasto') return acc - Number(m.monto);
+                    return acc;
+                  }, 0) >= 0 
+                  ? 'text-emerald-400' : 'text-rose-400'
+              }`}>
+                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
+                    .reduce((acc, m) => {
+                      if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
+                      if (m.tipo === 'gasto') return acc - Number(m.monto);
+                      return acc;
+                    }, 0)
+                    .toLocaleString()}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setEditingId(null);
+                setFormData({
+                  tipo: 'venta',
+                  monto: '',
+                  descripcion: '',
+                  fecha: format(selectedDate, 'yyyy-MM-dd'),
+                  productos: []
+                });
+                setShowModal(true);
+              }}
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 font-bold"
+            >
+              <Plus size={20} />
+              <span>Nuevo Movimiento</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal (Premium) */}
+      <Modal 
+        isOpen={!!showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(null)}
+        maxWidth="max-w-sm"
+        zIndex="z-[110]"
+      >
+        <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertTriangle size={32} />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-2 text-center">¿Confirmar eliminación?</h3>
+        <p className="text-slate-400 text-sm mb-8 text-center">Esta acción no se puede deshacer. Los datos se borrarán permanentemente del sistema.</p>
+
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowDeleteConfirm(null)}
+            className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 rounded-xl font-bold transition-all"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={confirmDelete}
+            className="flex-1 bg-rose-600 hover:bg-rose-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/20"
+          >
+            Sí, eliminar
+          </button>
+        </div>
+      </Modal>
+      {/* Feedback Modal (Premium Alert Replacement) */}
+      <Modal 
+        isOpen={!!feedbackModal}
+        onClose={() => setFeedbackModal(null)}
+        maxWidth="max-w-sm"
+        zIndex="z-[120]"
+      >
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
+          feedbackModal?.type === 'error' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
+        }`}>
+          {feedbackModal?.type === 'error' ? <AlertTriangle size={32} /> : <CheckCircle size={32} />}
+        </div>
+        
+        <h3 className="text-xl font-bold text-white mb-2 text-center">{feedbackModal?.title}</h3>
+        <p className="text-slate-400 text-sm mb-8 leading-relaxed text-center">{feedbackModal?.message}</p>
+
+        <button
+          onClick={() => setFeedbackModal(null)}
+          className={`w-full py-3 rounded-xl font-bold transition-all shadow-lg ${
+            feedbackModal?.type === 'error' 
+              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20' 
+              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
+          }`}
+        >
+          Entendido
+        </button>
+      </Modal>
     </div>
   );
 };
