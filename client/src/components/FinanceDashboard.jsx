@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { isSameDay, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Plus, TrendingUp, TrendingDown, Wallet, Calendar as CalendarIcon, Search, CheckCircle, Pencil, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Wallet, Calendar as CalendarIcon, Search, CheckCircle, Pencil, Trash2, AlertTriangle, X, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 import Calendar from './Calendar';
@@ -23,6 +23,11 @@ const mapBackendDate = (dateStr) => {
   let dStr = dateStr;
   if (dateStr instanceof Date) dStr = dateStr.toISOString();
   return dStr.substring(0, 10) + 'T12:00:00';
+};
+
+const capitalize = (str) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
@@ -54,6 +59,7 @@ const FinanceDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // ID del movimiento a borrar
   const [showDayModal, setShowDayModal] = useState(false);
+  const [selectedSale, setSelectedSale] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -163,6 +169,34 @@ const FinanceDashboard = () => {
     const cleanValue = value.replace(/\D/g, "");
     setFormData({ ...formData, [field]: cleanValue });
   };
+  
+  const getMovementDescription = (item) => {
+    const clientSuffix = item.cliente_nombre ? ` - ${item.cliente_nombre}` : '';
+
+    if (item.tipo === 'venta' && item.productos && item.productos.length === 1) {
+      const p = item.productos[0];
+      return `x${p.cantidad} ${p.nombre}${clientSuffix}`;
+    }
+    if (item.tipo === 'venta' && item.productos && item.productos.length > 1) {
+      return `Venta${clientSuffix}`;
+    }
+    return item.descripcion || (item.tipo === 'venta' ? 'Venta' : (item.tipo === 'abono' ? 'Abono' : 'Gasto'));
+  };
+
+  const generateDefaultDescription = (tipo, productos, clienteId) => {
+    const client = clients.find(c => c.id === clienteId);
+    if (tipo === 'venta') {
+      let prodPart = 'Venta';
+      if (productos && productos.length === 1) {
+        prodPart = `x${productos[0].cantidad} ${productos[0].nombre}`;
+      }
+      return client ? `${prodPart} - ${client.nombre}` : (productos.length > 0 ? prodPart : '');
+    }
+    if (tipo === 'abono') {
+      return client ? `${client.nombre} - Abono` : 'Abono';
+    }
+    return '';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -247,11 +281,15 @@ const FinanceDashboard = () => {
 
     const newProductos = [...formData.productos, { ...product, cantidad: 1 }];
     const newMonto = newProductos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+    const newDefaultDesc = generateDefaultDescription(formData.tipo, newProductos, formData.cliente_id);
 
     setFormData({
       ...formData,
       productos: newProductos,
-      monto: newMonto.toString()
+      monto: newMonto.toString(),
+      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
+        ? newDefaultDesc 
+        : formData.descripcion
     });
   };
 
@@ -260,22 +298,30 @@ const FinanceDashboard = () => {
       p.id === prodId ? { ...p, cantidad: parseInt(qty) || 0 } : p
     );
     const newMonto = newProductos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+    const newDefaultDesc = generateDefaultDescription(formData.tipo, newProductos, formData.cliente_id);
 
     setFormData({
       ...formData,
       productos: newProductos,
-      monto: newMonto.toString()
+      monto: newMonto.toString(),
+      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
+        ? newDefaultDesc 
+        : formData.descripcion
     });
   };
 
   const handleRemoveProductFromSale = (prodId) => {
     const newProductos = formData.productos.filter(p => p.id !== prodId);
     const newMonto = newProductos.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+    const newDefaultDesc = generateDefaultDescription(formData.tipo, newProductos, formData.cliente_id);
 
     setFormData({
       ...formData,
       productos: newProductos,
-      monto: newMonto.toString()
+      monto: newMonto.toString(),
+      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
+        ? newDefaultDesc 
+        : formData.descripcion
     });
   };
 
@@ -418,7 +464,7 @@ const FinanceDashboard = () => {
             className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 md:py-2 rounded-xl flex justify-center items-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 text-sm font-semibold"
           >
             <Plus size={18} />
-            <span>Nuevo Registro</span>
+            <span>Nuevo</span>
           </button>
         </div>
 
@@ -442,7 +488,7 @@ const FinanceDashboard = () => {
                       <span>{new Date(item.fecha).toLocaleDateString()}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-100 font-medium">{item.descripcion || 'Sin descripción'}</td>
+                  <td className="px-6 py-4 text-sm text-slate-100 font-medium">{getMovementDescription(item)}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${getBadgeColor(item.tipo, item.cliente_id)}`}>
                       {getBadgeText(item.tipo, item.cliente_id)}
@@ -456,6 +502,15 @@ const FinanceDashboard = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end space-x-2">
+                      {item.productos && item.productos.length > 1 && (
+                        <button
+                          onClick={() => setSelectedSale(item)}
+                          className="p-1.5 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
+                          title="Ver detalle"
+                        >
+                          <Eye size={16} />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEdit(item)}
                         className="p-1.5 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
@@ -490,7 +545,7 @@ const FinanceDashboard = () => {
         onClose={() => setShowModal(false)}
         maxWidth="max-w-md"
       >
-        <h3 className="text-2xl font-bold text-white mb-6">{editingId ? 'Editar Registro' : 'Nuevo Registro'}</h3>
+        <h3 className="text-2xl font-bold text-white mb-6">{editingId ? 'Editar' : 'Nuevo'}</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex bg-slate-800 p-1.5 rounded-2xl mb-6">
             {['venta', 'abono', 'gasto'].map(t => (
@@ -568,14 +623,14 @@ const FinanceDashboard = () => {
                         key={c.id}
                         type="button"
                         onClick={() => {
-                          const newDesc = formData.tipo === 'venta' 
-                            ? `${c.nombre} - Por cobrar` 
-                            : (formData.tipo === 'abono' ? `${c.nombre} - Abono` : formData.descripcion);
+                          const newDesc = generateDefaultDescription(formData.tipo, formData.productos, c.id);
                           
                           setFormData({ 
                             ...formData, 
                             cliente_id: c.id,
-                            descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción') ? newDesc : formData.descripcion
+                            descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
+                              ? newDesc 
+                              : formData.descripcion
                           });
                           setClientSearch('');
                         }}
@@ -776,18 +831,20 @@ const FinanceDashboard = () => {
         onClose={() => setShowDayModal(false)}
         maxWidth="max-w-lg"
       >
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h3 className="text-2xl font-bold text-white tracking-tight">
-              {selectedDate && format(selectedDate, 'eeee d', { locale: es })}
-            </h3>
-            <p className="text-slate-500 text-sm capitalize">
-              {selectedDate && format(selectedDate, 'MMMM yyyy', { locale: es })}
-            </p>
+        <div className="flex justify-between items-start mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-500 border border-blue-500/20">
+              <CalendarIcon size={24} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black text-white tracking-tight leading-none">
+                {selectedDate && capitalize(format(selectedDate, "eeee, d 'de' MMMM", { locale: es }))}
+              </h3>
+            </div>
           </div>
           <button
             onClick={() => setShowDayModal(false)}
-            className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+            className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 transition-all hover:text-white active:scale-90"
           >
             <X size={24} />
           </button>
@@ -820,7 +877,7 @@ const FinanceDashboard = () => {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-white truncate">
-                          {item.descripcion || (item.tipo === 'venta' ? 'Venta de productos' : (item.tipo === 'abono' ? 'Abono de cliente' : 'Gasto registrado'))}
+                          {getMovementDescription(item)}
                         </p>
                         <p className={`text-xs font-bold ${
                           item.tipo === 'gasto' ? 'text-rose-400' : 
@@ -831,6 +888,15 @@ const FinanceDashboard = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-1 transition-all">
+                      {item.productos && item.productos.length > 1 && (
+                        <button
+                          onClick={() => setSelectedSale(item)}
+                          className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
+                          title="Ver detalle"
+                        >
+                          <Eye size={14} />
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           handleEdit(item);
@@ -920,7 +986,7 @@ const FinanceDashboard = () => {
               className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 font-bold"
             >
               <Plus size={20} />
-              <span>Nuevo Movimiento</span>
+              <span>Nuevo</span>
             </button>
           </div>
         </div>
@@ -979,6 +1045,65 @@ const FinanceDashboard = () => {
           }`}
         >
           Entendido
+        </button>
+      </Modal>
+
+      {/* Sale Detail Modal (Premium) */}
+      <Modal
+        isOpen={!!selectedSale}
+        onClose={() => setSelectedSale(null)}
+        maxWidth="max-w-md"
+        zIndex="z-[130]"
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-extrabold text-white tracking-tight">Detalle de Venta</h3>
+          <button onClick={() => setSelectedSale(null)} className="p-2 hover:bg-slate-800 rounded-full transition-colors">
+            <X size={20} className="text-slate-400" />
+          </button>
+        </div>
+
+        <div className="bg-slate-800/40 rounded-2xl p-5 border border-slate-700/50 mb-6">
+          <div className="flex flex-col space-y-4">
+            {selectedSale?.productos?.map((p, i) => (
+              <div key={i} className="flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center text-xs font-bold">
+                    x{p.cantidad}
+                  </div>
+                  <span className="text-slate-200 text-sm font-medium">{p.nombre}</span>
+                </div>
+                <span className="text-slate-400 text-sm">
+                  ${(Number(p.cantidad) * Number(p.precio_unitario)).toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-slate-700 flex justify-between items-center">
+            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Total Cobrado</span>
+            <span className="text-2xl font-black text-emerald-400">
+              ${Number(selectedSale?.monto).toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {selectedSale?.cliente_id && (
+          <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl mb-6 flex items-center space-x-3">
+            <div className="p-2 bg-amber-500/20 rounded-lg text-amber-500">
+              <Wallet size={16} />
+            </div>
+            <div>
+              <p className="text-[10px] text-amber-500/70 uppercase font-black">Cliente (Crédito)</p>
+              <p className="text-sm text-amber-200 font-bold">{selectedSale.cliente_nombre}</p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => setSelectedSale(null)}
+          className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold transition-all border border-slate-700 shadow-lg active:scale-95"
+        >
+          Cerrar
         </button>
       </Modal>
     </div>

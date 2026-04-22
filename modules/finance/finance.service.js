@@ -109,7 +109,24 @@ exports.remove = async (id) => {
 };
 
 exports.getAllMovements = async () => {
-  return await model.findAll();
+  const movements = await model.findAll();
+  const movementIds = movements.map(m => m.id);
+
+  if (movementIds.length > 0) {
+    const allProducts = await model.findProductsByMovementIds(movementIds);
+    // Agrupar productos por movimiento_id de forma eficiente
+    const productsMap = allProducts.reduce((acc, p) => {
+      if (!acc[p.movimiento_id]) acc[p.movimiento_id] = [];
+      acc[p.movimiento_id].push(p);
+      return acc;
+    }, {});
+
+    movements.forEach(m => {
+      m.productos = productsMap[m.id] || [];
+    });
+  }
+
+  return movements;
 };
 
 exports.getSummary = async () => {

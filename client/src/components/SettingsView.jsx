@@ -93,7 +93,7 @@ const SettingsView = () => {
             className="fixed top-8 right-8 z-[100] bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-xl shadow-emerald-500/20 flex items-center space-x-3 font-bold"
           >
             <CheckCircle size={20} />
-            <span>¡Meta guardada con éxito!</span>
+            <span>Guardado</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -105,8 +105,8 @@ const SettingsView = () => {
             <Target size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">Meta Mensual de Ventas</h3>
-            <p className="text-slate-500 text-sm">Define cuánto esperas vender este mes.</p>
+            <h3 className="text-xl font-bold text-white">Meta Mensual</h3>
+            <p className="text-slate-500 text-sm">Objetivo de ventas esperado.</p>
           </div>
         </div>
 
@@ -121,10 +121,10 @@ const SettingsView = () => {
           </div>
           <button 
             onClick={handleUpdateGoal}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-all shadow-lg shadow-blue-600/20"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95"
           >
             <Save size={18} />
-            <span>Guardar Meta</span>
+            <span>Guardar</span>
           </button>
         </div>
       </section>
@@ -136,15 +136,15 @@ const SettingsView = () => {
             <Plus size={24} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">Gastos Fijos Mensuales</h3>
-            <p className="text-slate-500 text-sm">Estos gastos se descontarán automáticamente cada mes (Alquiler, Nómina, etc).</p>
+            <h3 className="text-xl font-bold text-white">Gastos Fijos</h3>
+            <p className="text-slate-500 text-sm">Costos automáticos recurrentes (Alquiler, servicios, etc).</p>
           </div>
         </div>
 
         <form onSubmit={handleAddExpense} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <input 
             type="text" 
-            placeholder="Descripción (ej: Internet)" 
+            placeholder="Descripción" 
             required
             value={newExpense.descripcion}
             onChange={(e) => setNewExpense({...newExpense, descripcion: e.target.value})}
@@ -152,7 +152,7 @@ const SettingsView = () => {
           />
           <input 
             type="text" 
-            placeholder="Monto ($)" 
+            placeholder="Monto" 
             required
             value={formatNumber(newExpense.monto)}
             onChange={(e) => handleNumberChange('monto', e.target.value, true)}
@@ -160,9 +160,9 @@ const SettingsView = () => {
           />
           <button 
             type="submit"
-            className="bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-all"
+            className="bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-all active:scale-95"
           >
-            Agregar Gasto
+            Agregar
           </button>
         </form>
 

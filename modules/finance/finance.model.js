@@ -106,3 +106,15 @@ exports.getProductsDistribution = async (limit = 5) => {
     return rows;
 };
 
+exports.findProductsByMovementIds = async (ids) => {
+    if (!ids || ids.length === 0) return [];
+    const query = `
+        SELECT vp.*, p.nombre 
+        FROM venta_productos vp 
+        JOIN productos p ON vp.producto_id = p.id 
+        WHERE vp.movimiento_id IN (?)
+    `;
+    const [rows] = await pool.query(query, [ids]);
+    return rows;
+};
+
