@@ -133,7 +133,7 @@ const DashboardView = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Ingresos (Mes)" 
-          value={`$${Number(data?.stats?.mes_ventas || 0).toLocaleString()}`}
+          value={`$${Number(data?.stats?.mes_ventas || 0).toLocaleString('es-ES')}`}
           subValue="Ventas del calendario actual"
           icon={TrendingUp}
           color="bg-emerald-500"
@@ -141,7 +141,7 @@ const DashboardView = () => {
         />
         <StatCard 
           title="Gastos (Mes)" 
-          value={`$${Number(data?.stats?.mes_gastos || 0).toLocaleString()}`}
+          value={`$${Number(data?.stats?.mes_gastos || 0).toLocaleString('es-ES')}`}
           subValue="Registros operativos del mes"
           icon={TrendingDown}
           color="bg-rose-500"
@@ -149,7 +149,7 @@ const DashboardView = () => {
         />
         <StatCard 
           title="Utilidad (Mes)" 
-          value={`$${(Number(data?.stats?.mes_ventas || 0) - Number(data?.stats?.mes_gastos || 0)).toLocaleString()}`}
+          value={`$${(Number(data?.stats?.mes_ventas || 0) - Number(data?.stats?.mes_gastos || 0)).toLocaleString('es-ES')}`}
           subValue="Balance bruto mensual"
           icon={DollarSign}
           color="bg-blue-500"
@@ -308,7 +308,7 @@ const DashboardView = () => {
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                   <span className="text-xs text-slate-300 font-medium">{item.nombre}</span>
                 </div>
-                <span className="text-xs font-bold text-white">${Number(item.total_generado).toLocaleString()}</span>
+                <span className="text-xs font-bold text-white">${Number(item.total_generado).toLocaleString('es-ES')}</span>
               </div>
             ))}
             {(!data?.distribution || data.distribution.length === 0) && (
@@ -355,7 +355,7 @@ const DashboardView = () => {
                     <p className="text-slate-500 text-xs font-medium uppercase tracking-widest mb-1">Día de mayor venta</p>
                     <p className="text-xl font-black text-white">
                         {data?.timeSeries?.length > 0 
-                            ? `$${Math.max(...data.timeSeries.map(d => d.ingresos)).toLocaleString()}`
+                            ? `$${Math.max(...data.timeSeries.map(d => d.ingresos)).toLocaleString('es-ES')}`
                             : '$0'
                         }
                     </p>

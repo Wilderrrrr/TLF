@@ -176,7 +176,7 @@ const ClientsView = () => {
                         </div>
                         <div>
                             <p className="text-slate-500 text-sm font-medium">Deuda Total Cobrable</p>
-                            <p className="text-2xl font-bold text-white">${totalDeuda.toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-white">${totalDeuda.toLocaleString('es-ES')}</p>
                         </div>
                     </div>
                 </div>
@@ -243,7 +243,7 @@ const ClientsView = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex flex-col items-end">
                                             <p className={`text-sm font-black ${Number(client.deuda) > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                                                ${Number(client.deuda).toLocaleString()}
+                                                ${Number(client.deuda).toLocaleString('es-ES')}
                                             </p>
                                             <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
                                                 {Number(client.deuda) > 0 ? 'Pendiente' : 'Al día'}
@@ -316,7 +316,7 @@ const ClientsView = () => {
                     </div>
                     <h3 className="text-2xl font-bold text-white text-center">{selectedClient?.nombre}</h3>
                     <p className={`mt-2 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest ${selectedClient && Number(selectedClient.deuda) > 0 ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
-                        {selectedClient && Number(selectedClient.deuda) > 0 ? `Debe $${Number(selectedClient.deuda).toLocaleString()}` : 'Al día'}
+                        {selectedClient && Number(selectedClient.deuda) > 0 ? `Debe $${Number(selectedClient.deuda).toLocaleString('es-ES')}` : 'Al día'}
                     </p>
                 </div>
 
@@ -514,7 +514,7 @@ const ClientsView = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2 tracking-tight text-center">¿Saldar Deuda Total?</h3>
                 <p className="text-slate-400 mb-6 text-sm leading-relaxed text-center">
-                    Se registrará un abono por <span className="text-emerald-400 font-bold">${showSettleConfirm ? Number(showSettleConfirm.deuda).toLocaleString() : 0}</span> para <span className="text-white font-bold">{showSettleConfirm?.nombre}</span>. El dinero se sumará a tu caja de hoy automáticamente.
+                    Se registrará un abono por <span className="text-emerald-400 font-bold">${showSettleConfirm ? Number(showSettleConfirm.deuda).toLocaleString('es-ES') : 0}</span> para <span className="text-white font-bold">{showSettleConfirm?.nombre}</span>. El dinero se sumará a tu caja de hoy automáticamente.
                 </p>
                 <div className="flex flex-col space-y-3">
                     <button

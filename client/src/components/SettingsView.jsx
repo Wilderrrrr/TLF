@@ -176,7 +176,7 @@ const SettingsView = () => {
                 <span className="text-slate-200 font-medium">{expense.descripcion}</span>
               </div>
               <div className="flex items-center space-x-6">
-                <span className="text-white font-bold">${Number(expense.monto).toLocaleString()}</span>
+                <span className="text-white font-bold">${Number(expense.monto).toLocaleString('es-ES')}</span>
                 <button 
                   onClick={() => handleDeleteExpense(expense.id)}
                   className="text-slate-600 hover:text-rose-500 transition-colors p-1"
@@ -195,7 +195,7 @@ const SettingsView = () => {
           
           <div className="pt-4 border-t border-slate-800 flex justify-between items-center px-4">
             <span className="text-slate-500 font-medium">Total Gastos Fijos</span>
-            <span className="text-rose-400 font-bold text-xl">${config.total_gastos_fijos.toLocaleString()}</span>
+            <span className="text-rose-400 font-bold text-xl">${config.total_gastos_fijos.toLocaleString('es-ES')}</span>
           </div>
 
           <Pagination 

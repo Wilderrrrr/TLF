@@ -45,7 +45,7 @@ const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
       )}
     </div>
     <h3 className="text-slate-400 text-sm font-medium mb-1">{title}</h3>
-    <p className="text-2xl font-black text-white tracking-tight">${Number(amount).toLocaleString()}</p>
+    <p className="text-2xl font-black text-white tracking-tight">${Number(amount).toLocaleString('es-ES')}</p>
     {subtitle && <p className="mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">{subtitle}</p>}
   </div>
 );
@@ -232,7 +232,7 @@ const FinanceDashboard = () => {
       if (selectedClient && payload.monto > selectedClient.deuda) {
         setFeedbackModal({
           title: 'Monto excedido',
-          message: `El monto del abono ($${payload.monto.toLocaleString()}) no puede ser mayor a la deuda del cliente ($${Number(selectedClient.deuda).toLocaleString()})`,
+          message: `El monto del abono ($${payload.monto.toLocaleString('es-ES')}) no puede ser mayor a la deuda del cliente ($${Number(selectedClient.deuda).toLocaleString('es-ES')})`,
           type: 'error'
         });
         return;
@@ -375,14 +375,14 @@ const FinanceDashboard = () => {
             <span>Progreso de Meta Mensual</span>
           </h3>
           <p className="text-slate-500 font-medium">
-            Meta: <span className="text-white">${config.meta_mensual.toLocaleString()}</span>
+            Meta: <span className="text-white">${config.meta_mensual.toLocaleString('es-ES')}</span>
           </p>
         </div>
 
         <div className="flex-1 w-full max-w-md space-y-3">
           <div className="flex justify-between text-sm font-bold">
             <span className="text-blue-400">{progressPercent}% completado</span>
-            <span className="text-slate-400">${monthVentas.toLocaleString()} / ${config.meta_mensual.toLocaleString()}</span>
+            <span className="text-slate-400">${monthVentas.toLocaleString('es-ES')} / ${config.meta_mensual.toLocaleString('es-ES')}</span>
           </div>
           <div className="h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shadow-inner">
             <motion.div
@@ -398,10 +398,10 @@ const FinanceDashboard = () => {
                 <span className="flex items-center justify-center space-x-1">
                   <span className="text-emerald-400 font-bold">¡Meta alcanzada!</span>
                   <span>Estás en zona de profit: </span>
-                  <span className="text-white font-black">${(monthVentas - config.meta_mensual).toLocaleString()} adicionales</span>
+                  <span className="text-white font-black">${(monthVentas - config.meta_mensual).toLocaleString('es-ES')} adicionales</span>
                 </span>
               ) 
-              : `Te faltan $${(config.meta_mensual - monthVentas).toLocaleString()} para el objetivo.`
+              : `Te faltan $${(config.meta_mensual - monthVentas).toLocaleString('es-ES')} para el objetivo.`
             }
           </p>
         </div>
@@ -429,7 +429,7 @@ const FinanceDashboard = () => {
             amount={monthGastos + config.total_gastos_fijos}
             icon={TrendingDown}
             color="bg-rose-500"
-            subtitle={`Var: $${monthGastos.toLocaleString()} | Fijos: $${config.total_gastos_fijos.toLocaleString()}`}
+            subtitle={`Var: $${monthGastos.toLocaleString('es-ES')} | Fijos: $${config.total_gastos_fijos.toLocaleString('es-ES')}`}
             trend={trendGastos}
           />
           <div className="pt-4 border-t border-slate-800">
@@ -498,7 +498,7 @@ const FinanceDashboard = () => {
                     item.tipo === 'gasto' ? 'text-rose-400' : 
                     (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
                   }`}>
-                    {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString()}
+                    {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString('es-ES')}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end space-x-2">
@@ -641,7 +641,7 @@ const FinanceDashboard = () => {
                           <p className="text-[10px] text-slate-500 uppercase">{c.documento || 'No Doc'}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-black text-rose-500">${Number(c.deuda).toLocaleString()}</p>
+                          <p className="text-xs font-black text-rose-500">${Number(c.deuda).toLocaleString('es-ES')}</p>
                           <p className="text-[8px] text-slate-600 font-bold uppercase">Deuda</p>
                         </div>
                       </button>
@@ -740,7 +740,7 @@ const FinanceDashboard = () => {
                               </p>
                             </div>
                             <div className="text-right flex-shrink-0">
-                              <p className="text-emerald-400 font-black text-sm">${Number(p.precio).toLocaleString()}</p>
+                              <p className="text-emerald-400 font-black text-sm">${Number(p.precio).toLocaleString('es-ES')}</p>
                               <p className="text-[8px] text-slate-600 uppercase font-bold">Precio Unitario</p>
                             </div>
                           </button>
@@ -776,7 +776,7 @@ const FinanceDashboard = () => {
                   >
                     <div className="flex-1 min-w-0 mr-3">
                       <p className="text-xs font-bold text-white truncate">{p.nombre}</p>
-                      <p className="text-[10px] text-slate-500">${Number(p.precio).toLocaleString()} c/u</p>
+                      <p className="text-[10px] text-slate-500">${Number(p.precio).toLocaleString('es-ES')} c/u</p>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2">
@@ -883,7 +883,7 @@ const FinanceDashboard = () => {
                           item.tipo === 'gasto' ? 'text-rose-400' : 
                           (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
                         }`}>
-                          {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString()}
+                          {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString('es-ES')}
                         </p>
                       </div>
                     </div>
@@ -927,7 +927,7 @@ const FinanceDashboard = () => {
               </p>
               <p className="text-lg font-black text-emerald-400">
                 ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono'))
-                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
+                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString('es-ES')}
               </p>
             </div>
             <div className="bg-amber-500/5 border border-amber-500/10 p-3 rounded-2xl">
@@ -936,7 +936,7 @@ const FinanceDashboard = () => {
               </p>
               <p className="text-lg font-black text-amber-400">
                 ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && (m.tipo === 'venta' && m.cliente_id))
-                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
+                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString('es-ES')}
               </p>
             </div>
             <div className="bg-rose-500/5 border border-rose-500/10 p-3 rounded-2xl">
@@ -945,7 +945,7 @@ const FinanceDashboard = () => {
               </p>
               <p className="text-lg font-black text-rose-400">
                 ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && m.tipo === 'gasto')
-                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString()}
+                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString('es-ES')}
               </p>
             </div>
           </div>
@@ -968,7 +968,7 @@ const FinanceDashboard = () => {
                       if (m.tipo === 'gasto') return acc - Number(m.monto);
                       return acc;
                     }, 0)
-                    .toLocaleString()}
+                    .toLocaleString('es-ES')}
               </p>
             </div>
             <button
@@ -1073,7 +1073,7 @@ const FinanceDashboard = () => {
                   <span className="text-slate-200 text-sm font-medium">{p.nombre}</span>
                 </div>
                 <span className="text-slate-400 text-sm">
-                  ${(Number(p.cantidad) * Number(p.precio_unitario)).toLocaleString()}
+                  ${(Number(p.cantidad) * Number(p.precio_unitario)).toLocaleString('es-ES')}
                 </span>
               </div>
             ))}
@@ -1082,7 +1082,7 @@ const FinanceDashboard = () => {
           <div className="mt-6 pt-5 border-t border-slate-700 flex justify-between items-center">
             <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Total Cobrado</span>
             <span className="text-2xl font-black text-emerald-400">
-              ${Number(selectedSale?.monto).toLocaleString()}
+              ${Number(selectedSale?.monto).toLocaleString('es-ES')}
             </span>
           </div>
         </div>

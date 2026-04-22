@@ -33,7 +33,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
               <div className="flex items-center space-x-1">
                 {isLowStock && <AlertTriangle size={10} className="text-amber-500 animate-pulse" />}
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${!manejaStock ? 'text-blue-400' : (isLowStock ? 'text-amber-500' : product.stock <= 0 ? 'text-rose-500' : 'text-emerald-400')}`}>
-                  {!manejaStock ? 'Disp.' : `${Number(product.stock).toLocaleString()} uds`}
+                  {!manejaStock ? 'Disp.' : `${Number(product.stock).toLocaleString('es-ES')} uds`}
                 </span>
               </div>
             </div>
@@ -83,7 +83,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                   </div>
                 )}
                 <p className={`text-lg font-bold ${!manejaStock ? 'text-blue-400' : (isLowStock ? 'text-amber-500' : product.stock <= 0 ? 'text-rose-500' : 'text-emerald-400')}`}>
-                  {!manejaStock ? 'Disponible' : `${Number(product.stock).toLocaleString()} uds`}
+                  {!manejaStock ? 'Disponible' : `${Number(product.stock).toLocaleString('es-ES')} uds`}
                 </p>
               </div>
             </div>

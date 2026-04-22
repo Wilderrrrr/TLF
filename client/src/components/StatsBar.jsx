@@ -15,7 +15,7 @@ const StatItem = ({ label, value, icon: Icon, color, trend }) => (
           </span>
         )}
       </div>
-      <p className="text-lg font-black text-white tracking-tight">${Number(value).toLocaleString()}</p>
+      <p className="text-lg font-black text-white tracking-tight">${Number(value).toLocaleString('es-ES')}</p>
     </div>
   </div>
 );
