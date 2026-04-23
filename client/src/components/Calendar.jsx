@@ -108,10 +108,12 @@ const Calendar = ({ movements, onDateClick }) => {
   };
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl">
+    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl h-full flex flex-col">
       {renderHeader()}
       {renderDays()}
-      {renderCells()}
+      <div className="flex-1">
+        {renderCells()}
+      </div>
       <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium text-slate-500">
         <div className="flex items-center space-x-2">
           <div className="w-2.5 h-2.5 bg-emerald-500/60 rounded-full" />

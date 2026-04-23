@@ -31,22 +31,42 @@ const capitalize = (str) => {
 };
 
 const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
-  <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all duration-300 group">
-    <div className="flex justify-between items-start mb-4">
-      <div className={`p-3 rounded-xl bg-opacity-10 ${color}`}>
-        <Icon className={`text-opacity-90 ${color.replace('bg-', 'text-')}`} size={24} />
-      </div>
-      {trend !== undefined && (
-        <span className={`text-[10px] font-black px-2 py-1 rounded-full ${
-          trend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+  <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl hover:border-slate-700 transition-all duration-300 group flex flex-row md:flex-col h-full items-center md:items-start relative overflow-hidden">
+    {/* Trend Badge - Top Right Always */}
+    {trend !== undefined && (
+      <div className="absolute top-4 right-4 z-10">
+        <span className={`text-[10px] font-black px-2 py-1 rounded-full flex items-center space-x-1 ${
+          trend > 0 ? 'bg-emerald-500/10 text-emerald-400' : 
+          trend < 0 ? 'bg-rose-500/10 text-rose-400' : 
+          'bg-slate-800 text-slate-400'
         }`}>
-          {trend >= 0 ? '↑' : '↓'}{Math.abs(trend)}% vs anterior
+          <span>{trend > 0 ? '↑' : trend < 0 ? '↓' : '•'}</span>
+          <span>{Math.abs(trend)}%</span>
         </span>
+      </div>
+    )}
+
+    {/* Icon Area */}
+    <div className="flex-shrink-0 mb-0 md:mb-6">
+      <div className={`p-2.5 md:p-3 rounded-xl bg-opacity-10 ${color}`}>
+        <Icon className={`text-opacity-90 ${color.replace('bg-', 'text-')}`} size={20} />
+      </div>
+    </div>
+
+    {/* Text Area */}
+    <div className="flex-1 min-w-0 ml-4 md:ml-0">
+      <h3 className="text-slate-400 text-[10px] md:text-sm font-medium mb-0.5 md:mb-1 truncate">{title}</h3>
+      <p className="text-lg md:text-2xl font-black text-white tracking-tight">
+        ${Number(amount || 0).toLocaleString('es-ES')}
+      </p>
+
+      {/* Subtitle - Desktop only or small below */}
+      {subtitle && (
+        <p className="mt-2 md:mt-4 text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed line-clamp-1">
+          {subtitle}
+        </p>
       )}
     </div>
-    <h3 className="text-slate-400 text-sm font-medium mb-1">{title}</h3>
-    <p className="text-2xl font-black text-white tracking-tight">${Number(amount).toLocaleString('es-ES')}</p>
-    {subtitle && <p className="mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">{subtitle}</p>}
   </div>
 );
 
@@ -74,15 +94,16 @@ const FinanceDashboard = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [clients, setClients] = useState([]);
   const [productSearch, setProductSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [clientSearch, setClientSearch] = useState('');
   const [feedbackModal, setFeedbackModal] = useState(null); // { title, message, type: 'error' | 'success' }
 
-  const filteredProductsForSale = allProducts.filter(p => 
+  const filteredProductsForSale = allProducts.filter(p =>
     p.nombre.toLowerCase().includes(productSearch.toLowerCase()) ||
     (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
   ).slice(0, 5);
 
-  const filteredClients = clients.filter(c => 
+  const filteredClients = clients.filter(c =>
     c.nombre.toLowerCase().includes(clientSearch.toLowerCase()) ||
     (c.documento && c.documento.toLowerCase().includes(clientSearch.toLowerCase()))
   ).slice(0, 5);
@@ -98,10 +119,10 @@ const FinanceDashboard = () => {
       ]);
       const mappedMovements = movRes.data.data.map(m => ({ ...m, fecha: mapBackendDate(m.fecha) }));
       setMovements(mappedMovements);
-      
+
       const mappedSummary = sumRes.data.data.map(s => ({ ...s, fecha: mapBackendDate(s.fecha) }));
       setSummary(mappedSummary);
-      
+
       setStats(statRes.data.data);
       setConfig(configRes.data.data);
       setClients(clientRes.data.data);
@@ -169,7 +190,7 @@ const FinanceDashboard = () => {
     const cleanValue = value.replace(/\D/g, "");
     setFormData({ ...formData, [field]: cleanValue });
   };
-  
+
   const getMovementDescription = (item) => {
     const clientSuffix = item.cliente_nombre ? ` - ${item.cliente_nombre}` : '';
 
@@ -200,7 +221,7 @@ const FinanceDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Preparar el payload con el monto limpio (quitando puntos)
     const cleanMonto = formData.monto.toString().replace(/\./g, '');
     const payload = {
@@ -287,8 +308,8 @@ const FinanceDashboard = () => {
       ...formData,
       productos: newProductos,
       monto: newMonto.toString(),
-      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
-        ? newDefaultDesc 
+      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id))
+        ? newDefaultDesc
         : formData.descripcion
     });
   };
@@ -304,8 +325,8 @@ const FinanceDashboard = () => {
       ...formData,
       productos: newProductos,
       monto: newMonto.toString(),
-      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
-        ? newDefaultDesc 
+      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id))
+        ? newDefaultDesc
         : formData.descripcion
     });
   };
@@ -319,15 +340,17 @@ const FinanceDashboard = () => {
       ...formData,
       productos: newProductos,
       monto: newMonto.toString(),
-      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
-        ? newDefaultDesc 
+      descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id))
+        ? newDefaultDesc
         : formData.descripcion
     });
   };
 
   const calculateTrend = (current, previous) => {
-    if (!previous || previous === 0) return current > 0 ? 100 : 0;
-    return Math.round(((current - previous) / previous) * 100);
+    const curr = Number(current || 0);
+    const prev = Number(previous || 0);
+    if (prev === 0) return curr > 0 ? 100 : 0;
+    return Math.round(((curr - prev) / prev) * 100);
   };
 
   const getBadgeColor = (tipo, hasClient) => {
@@ -358,33 +381,39 @@ const FinanceDashboard = () => {
 
   const progressPercent = Math.min(Math.round((monthVentas / config.meta_mensual) * 100), 100);
 
-  // Lógica de Paginación
+  // Lógica de Filtrado y Paginación
+  const filteredMovements = movements.filter(m =>
+    (m.descripcion || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (m.tipo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (m.cliente_nombre || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentMovements = movements.slice(indexOfFirstItem, indexOfLastItem);
+  const currentMovements = filteredMovements.slice(indexOfFirstItem, indexOfLastItem);
 
   if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-8">
       {/* Sección de Meta y Progreso */}
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
-        <div className="space-y-2">
-          <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-            <CheckCircle className="text-blue-500" size={20} />
+      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-5 md:p-8 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8">
+        <div className="space-y-1 md:space-y-2">
+          <h3 className="text-lg md:text-xl font-bold text-white flex items-center space-x-2">
+            <CheckCircle className="text-blue-500" size={18} />
             <span>Progreso de Meta Mensual</span>
           </h3>
-          <p className="text-slate-500 font-medium">
+          <p className="text-xs md:text-base text-slate-500 font-medium">
             Meta: <span className="text-white">${config.meta_mensual.toLocaleString('es-ES')}</span>
           </p>
         </div>
 
-        <div className="flex-1 w-full max-w-md space-y-3">
-          <div className="flex justify-between text-sm font-bold">
+        <div className="flex-1 w-full max-w-md space-y-2 md:space-y-3">
+          <div className="flex justify-between text-[10px] md:text-sm font-bold">
             <span className="text-blue-400">{progressPercent}% completado</span>
             <span className="text-slate-400">${monthVentas.toLocaleString('es-ES')} / ${config.meta_mensual.toLocaleString('es-ES')}</span>
           </div>
-          <div className="h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shadow-inner">
+          <div className="h-3 md:h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shadow-inner">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
@@ -393,14 +422,14 @@ const FinanceDashboard = () => {
             />
           </div>
           <p className="text-xs text-slate-500 text-center">
-            {progressPercent >= 100 
+            {progressPercent >= 100
               ? (
                 <span className="flex items-center justify-center space-x-1">
                   <span className="text-emerald-400 font-bold">¡Meta alcanzada!</span>
                   <span>Estás en zona de profit: </span>
                   <span className="text-white font-black">${(monthVentas - config.meta_mensual).toLocaleString('es-ES')} adicionales</span>
                 </span>
-              ) 
+              )
               : `Te faltan $${(config.meta_mensual - monthVentas).toLocaleString('es-ES')} para el objetivo.`
             }
           </p>
@@ -412,27 +441,31 @@ const FinanceDashboard = () => {
 
       {/* Vista de Calendario y Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 h-full">
           <Calendar movements={movements} onDateClick={handleDateClick} />
         </div>
-
-        <div className="space-y-6">
-          <StatCard
-            title="Ventas del Mes"
-            amount={monthVentas}
-            icon={TrendingUp}
-            color="bg-emerald-500"
-            trend={trendVentas}
-          />
-          <StatCard
-            title="Gastos Totales"
-            amount={monthGastos + config.total_gastos_fijos}
-            icon={TrendingDown}
-            color="bg-rose-500"
-            subtitle={`Var: $${monthGastos.toLocaleString('es-ES')} | Fijos: $${config.total_gastos_fijos.toLocaleString('es-ES')}`}
-            trend={trendGastos}
-          />
-          <div className="pt-4 border-t border-slate-800">
+        <div className="flex flex-col gap-6 h-full">
+          <div className="flex-1">
+            <StatCard
+              title="Ventas del Mes"
+              amount={monthVentas}
+              icon={TrendingUp}
+              color="bg-emerald-500"
+              subtitle="Ingresos brutos del periodo actual"
+              trend={trendVentas}
+            />
+          </div>
+          <div className="flex-1">
+            <StatCard
+              title="Gastos Totales"
+              amount={monthGastos + config.total_gastos_fijos}
+              icon={TrendingDown}
+              color="bg-rose-500"
+              subtitle={`Variables: $${monthGastos.toLocaleString('es-ES')} | Fijos: $${config.total_gastos_fijos.toLocaleString('es-ES')}`}
+              trend={trendGastos}
+            />
+          </div>
+          <div className="flex-1">
             <StatCard
               title="Utilidad Neta Real"
               amount={realBalance}
@@ -455,7 +488,9 @@ const FinanceDashboard = () => {
               <input
                 type="text"
                 placeholder="Buscar..."
-                className="w-full sm:w-64 bg-slate-800/50 border border-slate-700 rounded-full py-2 md:py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full sm:w-64 bg-slate-800/50 border border-slate-700 rounded-xl py-2 md:py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
@@ -494,10 +529,9 @@ const FinanceDashboard = () => {
                       {getBadgeText(item.tipo, item.cliente_id)}
                     </span>
                   </td>
-                  <td className={`px-6 py-4 text-sm font-black text-right ${
-                    item.tipo === 'gasto' ? 'text-rose-400' : 
-                    (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
-                  }`}>
+                  <td className={`px-6 py-4 text-sm font-black text-right ${item.tipo === 'gasto' ? 'text-rose-400' :
+                      (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
+                    }`}>
                     {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString('es-ES')}
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -533,15 +567,15 @@ const FinanceDashboard = () => {
 
         <Pagination
           currentPage={currentPage}
-          totalItems={movements.length}
+          totalItems={filteredMovements.length}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
         />
       </div>
 
       {/* Main Modal - Professional implementation */}
-      <Modal 
-        isOpen={showModal} 
+      <Modal
+        isOpen={showModal}
         onClose={() => setShowModal(false)}
         maxWidth="max-w-md"
       >
@@ -555,7 +589,7 @@ const FinanceDashboard = () => {
                 onClick={() => {
                   const isClientType = t === 'venta' || t === 'abono';
                   let newDesc = formData.descripcion;
-                  
+
                   if (isClientType && formData.cliente_id) {
                     const client = clients.find(c => c.id === formData.cliente_id);
                     if (client && (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion.includes('- Por cobrar') || formData.descripcion.includes('- Abono'))) {
@@ -563,10 +597,10 @@ const FinanceDashboard = () => {
                     }
                   }
 
-                  setFormData({ 
-                    ...formData, 
-                    tipo: t, 
-                    cliente_id: isClientType ? formData.cliente_id : null, 
+                  setFormData({
+                    ...formData,
+                    tipo: t,
+                    cliente_id: isClientType ? formData.cliente_id : null,
                     productos: t === 'venta' ? formData.productos : [],
                     descripcion: newDesc
                   });
@@ -576,8 +610,8 @@ const FinanceDashboard = () => {
                   }
                 }}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tipo === t
-                  ? (t === 'venta' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 
-                      t === 'abono' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' :
+                  ? (t === 'venta' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' :
+                    t === 'abono' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' :
                       'bg-rose-600 text-white shadow-lg shadow-rose-600/20')
                   : 'bg-transparent text-slate-500 hover:text-slate-300'
                   }`}
@@ -598,7 +632,7 @@ const FinanceDashboard = () => {
                   <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Venta a Crédito</span>
                 )}
               </div>
-              
+
               <div className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={16} />
                 <input
@@ -612,7 +646,7 @@ const FinanceDashboard = () => {
 
               <AnimatePresence>
                 {clientSearch && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
@@ -624,12 +658,12 @@ const FinanceDashboard = () => {
                         type="button"
                         onClick={() => {
                           const newDesc = generateDefaultDescription(formData.tipo, formData.productos, c.id);
-                          
-                          setFormData({ 
-                            ...formData, 
+
+                          setFormData({
+                            ...formData,
                             cliente_id: c.id,
-                            descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id)) 
-                              ? newDesc 
+                            descripcion: (!formData.descripcion || formData.descripcion === 'Sin descripción' || formData.descripcion === generateDefaultDescription(formData.tipo, formData.productos, formData.cliente_id))
+                              ? newDesc
                               : formData.descripcion
                           });
                           setClientSearch('');
@@ -658,7 +692,7 @@ const FinanceDashboard = () => {
                     </div>
                     <span className="text-xs font-bold text-white">{clients.find(c => c.id === formData.cliente_id)?.nombre}</span>
                   </div>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => { setFormData({ ...formData, cliente_id: null }); setClientSearch(''); }}
                     className="text-slate-500 hover:text-rose-500 transition-colors"
@@ -715,12 +749,12 @@ const FinanceDashboard = () => {
                       exit={{ opacity: 0, y: -10 }}
                       className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl divide-y divide-slate-800/50 max-h-60 overflow-y-auto custom-scrollbar"
                     >
-                      {allProducts.filter(p => 
-                        p.nombre.toLowerCase().includes(productSearch.toLowerCase()) || 
+                      {allProducts.filter(p =>
+                        p.nombre.toLowerCase().includes(productSearch.toLowerCase()) ||
                         (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
                       ).length > 0 ? (
-                        allProducts.filter(p => 
-                          p.nombre.toLowerCase().includes(productSearch.toLowerCase()) || 
+                        allProducts.filter(p =>
+                          p.nombre.toLowerCase().includes(productSearch.toLowerCase()) ||
                           (p.descripcion && p.descripcion.toLowerCase().includes(productSearch.toLowerCase()))
                         ).slice(0, 10).map(p => (
                           <button
@@ -767,11 +801,11 @@ const FinanceDashboard = () => {
                   )}
                 </div>
                 {formData.productos.map(p => (
-                  <motion.div 
+                  <motion.div
                     layout
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    key={p.id} 
+                    key={p.id}
                     className="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-slate-800 shadow-sm"
                   >
                     <div className="flex-1 min-w-0 mr-3">
@@ -826,7 +860,7 @@ const FinanceDashboard = () => {
       </Modal>
 
       {/* Day Details Modal (Premium List) */}
-      <Modal 
+      <Modal
         isOpen={showDayModal && !!selectedDate}
         onClose={() => setShowDayModal(false)}
         maxWidth="max-w-lg"
@@ -863,26 +897,24 @@ const FinanceDashboard = () => {
               {selectedDate && movements
                 .filter(m => isSameDay(new Date(m.fecha), selectedDate))
                 .map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between group hover:border-slate-600 transition-all"
                   >
                     <div className="flex items-center space-x-4 min-w-0">
-                      <div className={`p-2 rounded-xl bg-opacity-10 flex-shrink-0 ${
-                        item.tipo === 'venta' 
+                      <div className={`p-2 rounded-xl bg-opacity-10 flex-shrink-0 ${item.tipo === 'venta'
                           ? (item.cliente_id ? 'bg-amber-500 text-amber-400' : 'bg-emerald-500 text-emerald-400')
                           : (item.tipo === 'abono' ? 'bg-blue-500 text-blue-400' : 'bg-rose-500 text-rose-400')
-                      }`}>
+                        }`}>
                         {item.tipo === 'venta' || item.tipo === 'abono' ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-white truncate">
                           {getMovementDescription(item)}
                         </p>
-                        <p className={`text-xs font-bold ${
-                          item.tipo === 'gasto' ? 'text-rose-400' : 
-                          (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
-                        }`}>
+                        <p className={`text-xs font-bold ${item.tipo === 'gasto' ? 'text-rose-400' :
+                            (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
+                          }`}>
                           {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString('es-ES')}
                         </p>
                       </div>
@@ -953,22 +985,21 @@ const FinanceDashboard = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <p className="text-xs text-slate-500 font-medium uppercase tracking-widest mb-1">Balance Neto Real</p>
-              <p className={`text-2xl font-black ${
-                selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
+              <p className={`text-2xl font-black ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
                   .reduce((acc, m) => {
                     if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
                     if (m.tipo === 'gasto') return acc - Number(m.monto);
                     return acc;
-                  }, 0) >= 0 
+                  }, 0) >= 0
                   ? 'text-emerald-400' : 'text-rose-400'
-              }`}>
+                }`}>
                 ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
-                    .reduce((acc, m) => {
-                      if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
-                      if (m.tipo === 'gasto') return acc - Number(m.monto);
-                      return acc;
-                    }, 0)
-                    .toLocaleString('es-ES')}
+                  .reduce((acc, m) => {
+                    if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
+                    if (m.tipo === 'gasto') return acc - Number(m.monto);
+                    return acc;
+                  }, 0)
+                  .toLocaleString('es-ES')}
               </p>
             </div>
             <button
@@ -993,7 +1024,7 @@ const FinanceDashboard = () => {
       </Modal>
 
       {/* Delete Confirmation Modal (Premium) */}
-      <Modal 
+      <Modal
         isOpen={!!showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(null)}
         maxWidth="max-w-sm"
@@ -1021,28 +1052,26 @@ const FinanceDashboard = () => {
         </div>
       </Modal>
       {/* Feedback Modal (Premium Alert Replacement) */}
-      <Modal 
+      <Modal
         isOpen={!!feedbackModal}
         onClose={() => setFeedbackModal(null)}
         maxWidth="max-w-sm"
         zIndex="z-[120]"
       >
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
-          feedbackModal?.type === 'error' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
-        }`}>
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${feedbackModal?.type === 'error' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
+          }`}>
           {feedbackModal?.type === 'error' ? <AlertTriangle size={32} /> : <CheckCircle size={32} />}
         </div>
-        
+
         <h3 className="text-xl font-bold text-white mb-2 text-center">{feedbackModal?.title}</h3>
         <p className="text-slate-400 text-sm mb-8 leading-relaxed text-center">{feedbackModal?.message}</p>
 
         <button
           onClick={() => setFeedbackModal(null)}
-          className={`w-full py-3 rounded-xl font-bold transition-all shadow-lg ${
-            feedbackModal?.type === 'error' 
-              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20' 
+          className={`w-full py-3 rounded-xl font-bold transition-all shadow-lg ${feedbackModal?.type === 'error'
+              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
               : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
-          }`}
+            }`}
         >
           Entendido
         </button>

@@ -10,8 +10,28 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    delete axios.defaults.headers.common['Authorization'];
+  };
+
   useEffect(() => {
-    // Si hay un token guardado, intentamos recuperarlo o asumimos login
+    // Interceptor para manejar errores 401 (sesión expirada)
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.warn('Sesión expirada o inválida. Cerrando sesión...');
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Si hay un token guardado, verificar si no ha expirado (opcional pero recomendado)
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
@@ -22,7 +42,12 @@ export const AuthProvider = ({ children }) => {
     } else {
       delete axios.defaults.headers.common['Authorization'];
     }
+    
     setLoading(false);
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
   }, [token]);
 
   const API_URL = import.meta.env.MODE === 'development' 
@@ -55,14 +80,6 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: 'Error de conexión con el servidor' };
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (

@@ -2,20 +2,20 @@ import React from 'react';
 import { TrendingUp, TrendingDown, Target, Zap } from 'lucide-react';
 
 const StatItem = ({ label, value, icon: Icon, color, trend }) => (
-  <div className="flex items-center space-x-4 p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 relative overflow-hidden group">
+  <div className="flex items-center space-x-3 md:space-x-4 p-3 md:p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 relative overflow-hidden group">
     <div className={`p-2 rounded-lg ${color} bg-opacity-10 transition-transform group-hover:scale-110 duration-300`}>
-      <Icon size={20} className={color.replace('bg-', 'text-')} />
+      <Icon size={18} className={`md:w-5 md:h-5 ${color.replace('bg-', 'text-')}`} />
     </div>
     <div className="flex-1 min-w-0">
       <div className="flex justify-between items-start">
-        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{label}</p>
+        <p className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest truncate">{label}</p>
         {trend !== undefined && (
-          <span className={`text-[10px] font-black ${trend >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <span className={`text-[9px] md:text-[10px] font-black ${trend >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {trend >= 0 ? '↑' : '↓'}{Math.abs(trend)}%
           </span>
         )}
       </div>
-      <p className="text-lg font-black text-white tracking-tight">${Number(value).toLocaleString('es-ES')}</p>
+      <p className="text-base md:text-lg font-black text-white tracking-tight">${Number(value).toLocaleString('es-ES')}</p>
     </div>
   </div>
 );
@@ -36,7 +36,7 @@ const StatsBar = ({ stats, totalFixed = 0 }) => {
   const trendGastosMes = calculateTrend(totalMonthGastos, prevMonthGastosTotal);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
       <StatItem
         label="Últimos 7 días"
         value={stats.semana_ventas}

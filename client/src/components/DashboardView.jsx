@@ -19,22 +19,28 @@ const StatCard = ({ title, value, subValue, icon: Icon, trend, color }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-3xl"
+    className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl"
   >
-    <div className="flex justify-between items-start mb-4">
-      <div className={`p-3 rounded-2xl ${color} bg-opacity-10 text-${color.split('-')[1]}-400 shadow-inner`}>
-        <Icon size={24} />
+    <div className="flex justify-between items-start mb-2 md:mb-4">
+      <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl ${color} bg-opacity-10 text-${color.split('-')[1]}-400 shadow-inner`}>
+        <Icon size={20} className="md:w-6 md:h-6" />
       </div>
-      {trend && (
-        <span className={`flex items-center text-xs font-bold ${trend > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-          {trend > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+      {trend !== undefined && trend !== null && (
+        <span className={`flex items-center text-[10px] md:text-xs font-bold ${
+          trend > 0 ? 'text-emerald-400' : 
+          trend < 0 ? 'text-rose-400' : 
+          'text-slate-500'
+        }`}>
+          {trend > 0 ? <ArrowUpRight size={12} className="md:w-[14px] mr-0.5" /> : 
+           trend < 0 ? <ArrowDownRight size={12} className="md:w-[14px] mr-0.5" /> : 
+           <span className="mr-1">•</span>}
           {Math.abs(trend)}%
         </span>
       )}
     </div>
-    <p className="text-slate-500 text-sm font-medium mb-1">{title}</p>
-    <h3 className="text-2xl font-black text-white tracking-tight">{value}</h3>
-    <p className="text-xs text-slate-500 mt-2 font-medium">{subValue}</p>
+    <p className="text-slate-500 text-[10px] md:text-sm font-medium mb-1 truncate">{title}</p>
+    <h3 className="text-lg md:text-2xl font-black text-white tracking-tight">{value}</h3>
+    <p className="hidden md:block text-xs text-slate-500 mt-2 font-medium">{subValue}</p>
   </motion.div>
 );
 
@@ -130,7 +136,7 @@ const DashboardView = () => {
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard 
           title="Ingresos (Mes)" 
           value={`$${Number(data?.stats?.mes_ventas || 0).toLocaleString('es-ES')}`}

@@ -201,10 +201,10 @@ const ClientsView = () => {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                             <input
                                 type="text"
-                                placeholder="Buscar por nombre o documento..."
+                                placeholder="Buscar por nombre o celular..."
+                                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-800/50 border border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                             />
                         </div>
                     </div>
