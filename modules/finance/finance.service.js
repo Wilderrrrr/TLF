@@ -13,10 +13,10 @@ exports.create = async (data) => {
   try {
     await connection.beginTransaction();
 
-    // 1. Crear el movimiento (Ahora incluye cliente_id)
+    // 1. Crear el movimiento (Ahora incluye cliente_id y metodo_pago)
     const [result] = await connection.query(
-      'INSERT INTO movimientos (tipo, monto, descripcion, fecha, cliente_id) VALUES (?, ?, ?, ?, ?)',
-      [movementData.tipo, movementData.monto, movementData.descripcion, movementData.fecha, movementData.cliente_id]
+      'INSERT INTO movimientos (tipo, monto, descripcion, fecha, cliente_id, metodo_pago) VALUES (?, ?, ?, ?, ?, ?)',
+      [movementData.tipo, movementData.monto, movementData.descripcion, movementData.fecha, movementData.cliente_id, movementData.metodo_pago]
     );
     const movimientoId = result.insertId;
 

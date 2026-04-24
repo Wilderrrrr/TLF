@@ -4,6 +4,7 @@ import { Target, Trash2, Plus, Info, CheckCircle, Save } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 import Pagination from './Pagination';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatNumber } from '../utils/formatters';
 
 const API_BASE = '/api/settings';
 
@@ -38,11 +39,6 @@ const SettingsView = () => {
   useEffect(() => {
     fetchConfig();
   }, []);
-
-  const formatNumber = (val) => {
-    if (!val && val !== 0) return '';
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
 
   const handleUpdateGoal = async () => {
     try {
@@ -116,7 +112,7 @@ const SettingsView = () => {
               type="text" 
               value={formatNumber(editGoal)}
               onChange={(e) => handleNumberChange('meta', e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white font-bold"
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white font-bold"
             />
           </div>
           <button 
@@ -148,7 +144,7 @@ const SettingsView = () => {
             required
             value={newExpense.descripcion}
             onChange={(e) => setNewExpense({...newExpense, descripcion: e.target.value})}
-            className="md:col-span-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white text-sm"
+            className="md:col-span-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white text-sm"
           />
           <input 
             type="text" 
@@ -156,13 +152,14 @@ const SettingsView = () => {
             required
             value={formatNumber(newExpense.monto)}
             onChange={(e) => handleNumberChange('monto', e.target.value, true)}
-            className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white text-sm"
+            className="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white text-sm"
           />
           <button 
             type="submit"
-            className="bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-all active:scale-95"
+            className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center justify-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 py-3 md:py-0"
           >
-            Agregar
+            <Plus size={18} />
+            <span>Agregar</span>
           </button>
         </form>
 
@@ -176,7 +173,7 @@ const SettingsView = () => {
                 <span className="text-slate-200 font-medium">{expense.descripcion}</span>
               </div>
               <div className="flex items-center space-x-6">
-                <span className="text-white font-bold">${Number(expense.monto).toLocaleString('es-ES')}</span>
+                <span className="text-white font-bold">${formatNumber(expense.monto)}</span>
                 <button 
                   onClick={() => handleDeleteExpense(expense.id)}
                   className="text-slate-600 hover:text-rose-500 transition-colors p-1"
@@ -195,7 +192,7 @@ const SettingsView = () => {
           
           <div className="pt-4 border-t border-slate-800 flex justify-between items-center px-4">
             <span className="text-slate-500 font-medium">Total Gastos Fijos</span>
-            <span className="text-rose-400 font-bold text-xl">${config.total_gastos_fijos.toLocaleString('es-ES')}</span>
+            <span className="text-rose-400 font-bold text-xl">${formatNumber(config.total_gastos_fijos)}</span>
           </div>
 
           <Pagination 

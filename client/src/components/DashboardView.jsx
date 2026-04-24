@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
+import { formatNumber } from '../utils/formatters';
 
 const API_ANALYTICS = '/api/finance/analytics';
 
@@ -139,7 +140,7 @@ const DashboardView = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard 
           title="Ingresos (Mes)" 
-          value={`$${Number(data?.stats?.mes_ventas || 0).toLocaleString('es-ES')}`}
+          value={`$${formatNumber(data?.stats?.mes_ventas || 0)}`}
           subValue="Ventas del calendario actual"
           icon={TrendingUp}
           color="bg-emerald-500"
@@ -147,7 +148,7 @@ const DashboardView = () => {
         />
         <StatCard 
           title="Gastos (Mes)" 
-          value={`$${Number(data?.stats?.mes_gastos || 0).toLocaleString('es-ES')}`}
+          value={`$${formatNumber(data?.stats?.mes_gastos || 0)}`}
           subValue="Registros operativos del mes"
           icon={TrendingDown}
           color="bg-rose-500"
@@ -155,7 +156,7 @@ const DashboardView = () => {
         />
         <StatCard 
           title="Utilidad (Mes)" 
-          value={`$${(Number(data?.stats?.mes_ventas || 0) - Number(data?.stats?.mes_gastos || 0)).toLocaleString('es-ES')}`}
+          value={`$${formatNumber(Number(data?.stats?.mes_ventas || 0) - Number(data?.stats?.mes_gastos || 0))}`}
           subValue="Balance bruto mensual"
           icon={DollarSign}
           color="bg-blue-500"
@@ -314,7 +315,7 @@ const DashboardView = () => {
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                   <span className="text-xs text-slate-300 font-medium">{item.nombre}</span>
                 </div>
-                <span className="text-xs font-bold text-white">${Number(item.total_generado).toLocaleString('es-ES')}</span>
+                <span className="text-xs font-bold text-white">${formatNumber(item.total_generado)}</span>
               </div>
             ))}
             {(!data?.distribution || data.distribution.length === 0) && (
@@ -361,7 +362,7 @@ const DashboardView = () => {
                     <p className="text-slate-500 text-xs font-medium uppercase tracking-widest mb-1">Día de mayor venta</p>
                     <p className="text-xl font-black text-white">
                         {data?.timeSeries?.length > 0 
-                            ? `$${Math.max(...data.timeSeries.map(d => d.ingresos)).toLocaleString('es-ES')}`
+                            ? `$${formatNumber(Math.max(...data.timeSeries.map(d => d.ingresos)))}`
                             : '$0'
                         }
                     </p>

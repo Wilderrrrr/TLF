@@ -4,13 +4,13 @@ import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, ChevronRight, Che
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 import Modal from './Modal';
+import { formatNumber } from '../utils/formatters';
 
 const API_BASE = '/api/products';
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
   const manejaStock = product.maneja_stock === 1 || product.maneja_stock === true;
   const isLowStock = manejaStock && product.stock_minimo !== null && product.stock <= product.stock_minimo;
-  const formattedPrice = Math.floor(product.precio).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
   return (
     <div className={`bg-slate-900/40 backdrop-blur-md border rounded-2xl transition-all group relative overflow-hidden ${isLowStock ? 'border-amber-500/50 shadow-lg shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'}`}>
@@ -28,12 +28,12 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           <div className="min-w-0 pr-2">
             <h3 className="text-white font-bold text-sm truncate">{product.nombre}</h3>
             <div className="flex items-center space-x-2 mt-0.5">
-              <span className="text-emerald-400 font-bold text-xs">${formattedPrice}</span>
+              <span className="text-emerald-400 font-bold text-xs">${formatNumber(product.precio)}</span>
               <span className="text-slate-600 text-[10px]">•</span>
               <div className="flex items-center space-x-1">
                 {isLowStock && <AlertTriangle size={10} className="text-amber-500 animate-pulse" />}
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${!manejaStock ? 'text-blue-400' : (isLowStock ? 'text-amber-500' : product.stock <= 0 ? 'text-rose-500' : 'text-emerald-400')}`}>
-                  {!manejaStock ? 'Disp.' : `${Number(product.stock).toLocaleString('es-ES')} uds`}
+                  {!manejaStock ? 'Disp.' : `${formatNumber(product.stock)} uds`}
                 </span>
               </div>
             </div>
@@ -72,7 +72,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           <div className="flex justify-between items-end mt-4">
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-0.5">Precio</p>
-              <p className="text-xl font-bold text-emerald-400">${formattedPrice}</p>
+              <p className="text-xl font-bold text-emerald-400">${formatNumber(product.precio)}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-0.5">Disponibilidad</p>
@@ -83,7 +83,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                   </div>
                 )}
                 <p className={`text-lg font-bold ${!manejaStock ? 'text-blue-400' : (isLowStock ? 'text-amber-500' : product.stock <= 0 ? 'text-rose-500' : 'text-emerald-400')}`}>
-                  {!manejaStock ? 'Disponible' : `${Number(product.stock).toLocaleString('es-ES')} uds`}
+                  {!manejaStock ? 'Disponible' : `${formatNumber(product.stock)} uds`}
                 </p>
               </div>
             </div>
@@ -126,11 +126,6 @@ const ProductsView = () => {
   }, []);
 
 
-
-  const formatNumber = (val) => {
-    if (!val && val !== 0) return '';
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
 
   const handleNumberChange = (field, value) => {
     // Eliminar todo lo que no sea número

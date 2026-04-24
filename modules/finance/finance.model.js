@@ -15,13 +15,13 @@ exports.findAll = async () => {
   return rows;
 };
 
-exports.create = async ({ tipo, monto, descripcion, fecha, cliente_id }) => {
+exports.create = async ({ tipo, monto, descripcion, fecha, cliente_id, metodo_pago }) => {
   const [result] = await pool.query(
-    'INSERT INTO movimientos (tipo, monto, descripcion, fecha, cliente_id) VALUES (?, ?, ?, ?, ?)',
-    [tipo, monto, descripcion, fecha, cliente_id]
+    'INSERT INTO movimientos (tipo, monto, descripcion, fecha, cliente_id, metodo_pago) VALUES (?, ?, ?, ?, ?, ?)',
+    [tipo, monto, descripcion, fecha, cliente_id, metodo_pago]
   );
 
-  return { id: result.insertId, tipo, monto, descripcion, fecha, cliente_id };
+  return { id: result.insertId, tipo, monto, descripcion, fecha, cliente_id, metodo_pago };
 };
 
 exports.getDailySummary = async () => {
@@ -39,12 +39,12 @@ exports.getDailySummary = async () => {
   return rows;
 };
 
-exports.update = async (id, { tipo, monto, descripcion, fecha }) => {
+exports.update = async (id, { tipo, monto, descripcion, fecha, metodo_pago }) => {
   await pool.query(
-    'UPDATE movimientos SET tipo = ?, monto = ?, descripcion = ?, fecha = ? WHERE id = ?',
-    [tipo, monto, descripcion, fecha, id]
+    'UPDATE movimientos SET tipo = ?, monto = ?, descripcion = ?, fecha = ?, metodo_pago = ? WHERE id = ?',
+    [tipo, monto, descripcion, fecha, metodo_pago, id]
   );
-  return { id, tipo, monto, descripcion, fecha };
+  return { id, tipo, monto, descripcion, fecha, metodo_pago };
 };
 
 exports.remove = async (id) => {

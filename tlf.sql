@@ -72,6 +72,7 @@ CREATE TABLE movimientos (
     descripcion VARCHAR(255),
     fecha DATE NOT NULL,
     cliente_id INT NULL,
+    metodo_pago ENUM('Efectivo', 'Transferencia') DEFAULT 'Efectivo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL
 );

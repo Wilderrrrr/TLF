@@ -21,13 +21,16 @@ const movimientoSchema = Joi.object({
     'date.format': 'La fecha debe tener un formato válido (YYYY-MM-DD)',
   }),
   cliente_id: Joi.number().allow(null).optional(),
+  metodo_pago: Joi.string().valid('Efectivo', 'Transferencia').default('Efectivo').messages({
+    'any.only': 'El método de pago debe ser "Efectivo" o "Transferencia"',
+  }),
   productos: Joi.array().items(Joi.object({
     id: Joi.number().required(),
     nombre: Joi.string().required(),
     precio: Joi.number().required(),
     cantidad: Joi.number().min(1).required(),
   }).unknown()).optional(),
-});
+}).unknown();
 
 module.exports = {
   movimientoSchema,

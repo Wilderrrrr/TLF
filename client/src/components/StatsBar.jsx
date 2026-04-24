@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Target, Zap } from 'lucide-react';
+import { formatNumber } from '../utils/formatters';
 
 const StatItem = ({ label, value, icon: Icon, color, trend }) => (
   <div className="flex items-center space-x-3 md:space-x-4 p-3 md:p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 relative overflow-hidden group">
@@ -15,7 +16,7 @@ const StatItem = ({ label, value, icon: Icon, color, trend }) => (
           </span>
         )}
       </div>
-      <p className="text-base md:text-lg font-black text-white tracking-tight">${Number(value).toLocaleString('es-ES')}</p>
+      <p className="text-base md:text-lg font-black text-white tracking-tight">${formatNumber(value)}</p>
     </div>
   </div>
 );

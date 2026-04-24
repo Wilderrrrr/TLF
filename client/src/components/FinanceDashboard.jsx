@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { isSameDay, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Plus, TrendingUp, TrendingDown, Wallet, Calendar as CalendarIcon, Search, CheckCircle, Pencil, Trash2, AlertTriangle, X, Eye } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Wallet, Calendar as CalendarIcon, Search, CheckCircle, Pencil, Trash2, AlertTriangle, X, Eye, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
 import Calendar from './Calendar';
 import StatsBar from './StatsBar';
 import Pagination from './Pagination';
 import Modal from './Modal';
+import { formatNumber } from '../utils/formatters';
 
 const API_BASE = '/api/finance';
 
@@ -35,11 +36,10 @@ const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
     {/* Trend Badge - Top Right Always */}
     {trend !== undefined && (
       <div className="absolute top-4 right-4 z-10">
-        <span className={`text-[10px] font-black px-2 py-1 rounded-full flex items-center space-x-1 ${
-          trend > 0 ? 'bg-emerald-500/10 text-emerald-400' : 
-          trend < 0 ? 'bg-rose-500/10 text-rose-400' : 
-          'bg-slate-800 text-slate-400'
-        }`}>
+        <span className={`text-[10px] font-black px-2 py-1 rounded-full flex items-center space-x-1 ${trend > 0 ? 'bg-emerald-500/10 text-emerald-400' :
+          trend < 0 ? 'bg-rose-500/10 text-rose-400' :
+            'bg-slate-800 text-slate-400'
+          }`}>
           <span>{trend > 0 ? '↑' : trend < 0 ? '↓' : '•'}</span>
           <span>{Math.abs(trend)}%</span>
         </span>
@@ -57,7 +57,7 @@ const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
     <div className="flex-1 min-w-0 ml-4 md:ml-0">
       <h3 className="text-slate-400 text-[10px] md:text-sm font-medium mb-0.5 md:mb-1 truncate">{title}</h3>
       <p className="text-lg md:text-2xl font-black text-white tracking-tight">
-        ${Number(amount || 0).toLocaleString('es-ES')}
+        ${formatNumber(amount || 0)}
       </p>
 
       {/* Subtitle - Desktop only or small below */}
@@ -84,19 +84,23 @@ const FinanceDashboard = () => {
   const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [formData, setFormData] = useState({
+  const INITIAL_FORM_STATE = {
     tipo: 'venta',
     monto: '',
     descripcion: '',
     fecha: getLocalDateString(),
-    productos: [] // [{ id, nombre, precio, cantidad }]
-  });
+    metodo_pago: 'Efectivo',
+    productos: []
+  };
+
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [allProducts, setAllProducts] = useState([]);
   const [clients, setClients] = useState([]);
   const [productSearch, setProductSearch] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [clientSearch, setClientSearch] = useState('');
   const [feedbackModal, setFeedbackModal] = useState(null); // { title, message, type: 'error' | 'success' }
+  const [isIngresosExpanded, setIsIngresosExpanded] = useState(false);
 
   const filteredProductsForSale = allProducts.filter(p =>
     p.nombre.toLowerCase().includes(productSearch.toLowerCase()) ||
@@ -142,6 +146,15 @@ const FinanceDashboard = () => {
     setShowDayModal(true);
   };
 
+  const handleNew = (date = null) => {
+    setEditingId(null);
+    setFormData({
+      ...INITIAL_FORM_STATE,
+      fecha: date ? format(date, 'yyyy-MM-dd') : getLocalDateString()
+    });
+    setShowModal(true);
+  };
+
   const handleEdit = (item) => {
     setEditingId(item.id);
     setFormData({
@@ -149,6 +162,7 @@ const FinanceDashboard = () => {
       monto: item.monto,
       descripcion: item.descripcion,
       fecha: new Date(item.fecha).toISOString().split('T')[0],
+      metodo_pago: item.metodo_pago || 'Efectivo',
       productos: [] // La edición simple no carga productos previos por ahora
     });
     setShowModal(true);
@@ -181,10 +195,10 @@ const FinanceDashboard = () => {
     };
   }, [showModal, showDeleteConfirm, showDayModal, feedbackModal]);
 
-  const formatNumber = (val) => {
-    if (!val && val !== 0) return '';
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
+  // Resetear la expansión de ingresos cuando se cierra el modal del día
+  useEffect(() => {
+    if (!showDayModal) setIsIngresosExpanded(false);
+  }, [showDayModal]);
 
   const handleNumberChange = (field, value) => {
     const cleanValue = value.replace(/\D/g, "");
@@ -253,7 +267,7 @@ const FinanceDashboard = () => {
       if (selectedClient && payload.monto > selectedClient.deuda) {
         setFeedbackModal({
           title: 'Monto excedido',
-          message: `El monto del abono ($${payload.monto.toLocaleString('es-ES')}) no puede ser mayor a la deuda del cliente ($${Number(selectedClient.deuda).toLocaleString('es-ES')})`,
+          message: `El monto del abono ($${formatNumber(payload.monto)}) no puede ser mayor a la deuda del cliente ($${formatNumber(selectedClient.deuda)})`,
           type: 'error'
         });
         return;
@@ -273,6 +287,7 @@ const FinanceDashboard = () => {
         monto: '',
         descripcion: '',
         fecha: getLocalDateString(),
+        metodo_pago: 'Efectivo',
         productos: [],
         cliente_id: null
       });
@@ -360,6 +375,13 @@ const FinanceDashboard = () => {
     return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
   };
 
+  const getAmountColor = (tipo, hasClient) => {
+    if (tipo === 'gasto') return 'text-rose-400';
+    if (tipo === 'abono') return 'text-blue-400';
+    if (tipo === 'venta' && hasClient) return 'text-amber-400';
+    return 'text-emerald-400';
+  };
+
   const getBadgeText = (tipo, hasClient) => {
     if (tipo === 'gasto') return 'Gasto';
     if (tipo === 'abono') return 'Abono';
@@ -392,6 +414,20 @@ const FinanceDashboard = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentMovements = filteredMovements.slice(indexOfFirstItem, indexOfLastItem);
 
+  const dayMovements = selectedDate ? movements.filter(m => isSameDay(new Date(m.fecha), selectedDate)) : [];
+  const { ef: dayIngresosEf, tr: dayIngresosTr } = dayMovements.reduce((acc, m) => {
+    if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') {
+      if (m.metodo_pago === 'Transferencia') {
+        acc.tr += Number(m.monto);
+      } else {
+        acc.ef += Number(m.monto); // Fallback a Efectivo para registros legacy
+      }
+    }
+    return acc;
+  }, { ef: 0, tr: 0 });
+  const hasTransfers = dayIngresosTr > 0;
+  const hasAnyIncome = dayIngresosEf > 0 || dayIngresosTr > 0;
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -404,14 +440,14 @@ const FinanceDashboard = () => {
             <span>Progreso de Meta Mensual</span>
           </h3>
           <p className="text-xs md:text-base text-slate-500 font-medium">
-            Meta: <span className="text-white">${config.meta_mensual.toLocaleString('es-ES')}</span>
+            Meta: <span className="text-white">${formatNumber(config.meta_mensual)}</span>
           </p>
         </div>
 
         <div className="flex-1 w-full max-w-md space-y-2 md:space-y-3">
           <div className="flex justify-between text-[10px] md:text-sm font-bold">
             <span className="text-blue-400">{progressPercent}% completado</span>
-            <span className="text-slate-400">${monthVentas.toLocaleString('es-ES')} / ${config.meta_mensual.toLocaleString('es-ES')}</span>
+            <span className="text-slate-400">${formatNumber(monthVentas)} / ${formatNumber(config.meta_mensual)}</span>
           </div>
           <div className="h-3 md:h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shadow-inner">
             <motion.div
@@ -427,10 +463,10 @@ const FinanceDashboard = () => {
                 <span className="flex items-center justify-center space-x-1">
                   <span className="text-emerald-400 font-bold">¡Meta alcanzada!</span>
                   <span>Estás en zona de profit: </span>
-                  <span className="text-white font-black">${(monthVentas - config.meta_mensual).toLocaleString('es-ES')} adicionales</span>
+                  <span className="text-white font-black">${formatNumber(monthVentas - config.meta_mensual)} adicionales</span>
                 </span>
               )
-              : `Te faltan $${(config.meta_mensual - monthVentas).toLocaleString('es-ES')} para el objetivo.`
+              : `Te faltan $${formatNumber(config.meta_mensual - monthVentas)} para el objetivo.`
             }
           </p>
         </div>
@@ -461,7 +497,7 @@ const FinanceDashboard = () => {
               amount={monthGastos + config.total_gastos_fijos}
               icon={TrendingDown}
               color="bg-rose-500"
-              subtitle={`Variables: $${monthGastos.toLocaleString('es-ES')} | Fijos: $${config.total_gastos_fijos.toLocaleString('es-ES')}`}
+              subtitle={`Variables: $${formatNumber(monthGastos)} | Fijos: $${formatNumber(config.total_gastos_fijos)}`}
               trend={trendGastos}
             />
           </div>
@@ -495,7 +531,7 @@ const FinanceDashboard = () => {
             </div>
           </div>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => handleNew()}
             className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 md:py-2 rounded-xl flex justify-center items-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 text-sm font-semibold"
           >
             <Plus size={18} />
@@ -523,16 +559,21 @@ const FinanceDashboard = () => {
                       <span>{new Date(item.fecha).toLocaleDateString()}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-100 font-medium">{getMovementDescription(item)}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-2">
+                      <div className={`p-1.5 rounded-lg ${item.metodo_pago === 'Transferencia' ? 'bg-blue-500/10 text-blue-400' : 'bg-slate-500/10 text-slate-400'}`} title={item.metodo_pago}>
+                        {item.metodo_pago === 'Transferencia' ? <TrendingUp size={12} /> : <Wallet size={12} />}
+                      </div>
+                      <span className="text-sm text-slate-100 font-medium">{getMovementDescription(item)}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${getBadgeColor(item.tipo, item.cliente_id)}`}>
                       {getBadgeText(item.tipo, item.cliente_id)}
                     </span>
                   </td>
-                  <td className={`px-6 py-4 text-sm font-black text-right ${item.tipo === 'gasto' ? 'text-rose-400' :
-                      (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
-                    }`}>
-                    {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString('es-ES')}
+                  <td className={`px-6 py-4 text-sm font-black text-right ${getAmountColor(item.tipo, item.cliente_id)}`}>
+                    {item.tipo === 'gasto' ? '-' : '+'}${formatNumber(item.monto)}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end space-x-2">
@@ -675,7 +716,7 @@ const FinanceDashboard = () => {
                           <p className="text-[10px] text-slate-500 uppercase">{c.documento || 'No Doc'}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-black text-rose-500">${Number(c.deuda).toLocaleString('es-ES')}</p>
+                          <p className="text-xs font-black text-rose-500">${formatNumber(c.deuda)}</p>
                           <p className="text-[8px] text-slate-600 font-bold uppercase">Deuda</p>
                         </div>
                       </button>
@@ -722,6 +763,35 @@ const FinanceDashboard = () => {
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-white"
             />
           </div>
+
+          {!(formData.tipo === 'venta' && formData.cliente_id) && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-3 mb-4"
+            >
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Método de Pago</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'Efectivo', icon: Wallet, color: 'emerald' },
+                  { id: 'Transferencia', icon: TrendingUp, color: 'blue' }
+                ].map(method => (
+                  <button
+                    key={method.id}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, metodo_pago: method.id })}
+                    className={`flex items-center justify-center space-x-2 py-3 rounded-xl border-2 transition-all ${formData.metodo_pago === method.id
+                      ? `bg-${method.color}-600/10 border-${method.color}-500/50 text-${method.color}-400 shadow-lg shadow-${method.color}-500/5`
+                      : 'bg-slate-900/50 border-slate-800 text-slate-500 hover:border-slate-700'
+                      }`}
+                  >
+                    <method.icon size={16} className={formData.metodo_pago === method.id ? `text-${method.color}-400` : 'text-slate-600'} />
+                    <span className="text-xs font-bold">{method.id}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
           {formData.tipo === 'venta' && (
             <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 space-y-4">
               <div className="flex justify-between items-center">
@@ -774,7 +844,7 @@ const FinanceDashboard = () => {
                               </p>
                             </div>
                             <div className="text-right flex-shrink-0">
-                              <p className="text-emerald-400 font-black text-sm">${Number(p.precio).toLocaleString('es-ES')}</p>
+                              <p className="text-emerald-400 font-black text-sm">${formatNumber(p.precio)}</p>
                               <p className="text-[8px] text-slate-600 uppercase font-bold">Precio Unitario</p>
                             </div>
                           </button>
@@ -810,7 +880,7 @@ const FinanceDashboard = () => {
                   >
                     <div className="flex-1 min-w-0 mr-3">
                       <p className="text-xs font-bold text-white truncate">{p.nombre}</p>
-                      <p className="text-[10px] text-slate-500">${Number(p.precio).toLocaleString('es-ES')} c/u</p>
+                      <p className="text-[10px] text-slate-500">${formatNumber(p.precio)} c/u</p>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2">
@@ -903,8 +973,8 @@ const FinanceDashboard = () => {
                   >
                     <div className="flex items-center space-x-4 min-w-0">
                       <div className={`p-2 rounded-xl bg-opacity-10 flex-shrink-0 ${item.tipo === 'venta'
-                          ? (item.cliente_id ? 'bg-amber-500 text-amber-400' : 'bg-emerald-500 text-emerald-400')
-                          : (item.tipo === 'abono' ? 'bg-blue-500 text-blue-400' : 'bg-rose-500 text-rose-400')
+                        ? (item.cliente_id ? 'bg-amber-500 text-amber-400' : 'bg-emerald-500 text-emerald-400')
+                        : (item.tipo === 'abono' ? 'bg-blue-500 text-blue-400' : 'bg-rose-500 text-rose-400')
                         }`}>
                         {item.tipo === 'venta' || item.tipo === 'abono' ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                       </div>
@@ -912,10 +982,8 @@ const FinanceDashboard = () => {
                         <p className="text-sm font-bold text-white truncate">
                           {getMovementDescription(item)}
                         </p>
-                        <p className={`text-xs font-bold ${item.tipo === 'gasto' ? 'text-rose-400' :
-                            (item.tipo === 'venta' && item.cliente_id ? 'text-amber-400' : 'text-emerald-400')
-                          }`}>
-                          {item.tipo === 'gasto' ? '-' : '+'}${Number(item.monto).toLocaleString('es-ES')}
+                        <p className={`text-xs font-bold ${getAmountColor(item.tipo, item.cliente_id)}`}>
+                          {item.tipo === 'gasto' ? '-' : '+'}${formatNumber(item.monto)}
                         </p>
                       </div>
                     </div>
@@ -952,33 +1020,79 @@ const FinanceDashboard = () => {
         </div>
 
         <div className="mt-6 pt-6 border-t border-slate-800 space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-2xl">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
-                <TrendingUp size={10} className="mr-1" /> Ingresos Hoy
-              </p>
-              <p className="text-lg font-black text-emerald-400">
-                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono'))
-                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString('es-ES')}
-              </p>
-            </div>
-            <div className="bg-amber-500/5 border border-amber-500/10 p-3 rounded-2xl">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
-                <Wallet size={10} className="mr-1" /> Fiados Hoy
-              </p>
-              <p className="text-lg font-black text-amber-400">
-                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && (m.tipo === 'venta' && m.cliente_id))
-                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString('es-ES')}
-              </p>
-            </div>
-            <div className="bg-rose-500/5 border border-rose-500/10 p-3 rounded-2xl">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
-                <TrendingDown size={10} className="mr-1" /> Gastos
-              </p>
-              <p className="text-lg font-black text-rose-400">
-                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && m.tipo === 'gasto')
-                  .reduce((acc, m) => acc + Number(m.monto), 0).toLocaleString('es-ES')}
-              </p>
+          <div className="space-y-4">
+            <button 
+              type="button"
+              onClick={() => hasTransfers && setIsIngresosExpanded(!isIngresosExpanded)}
+              disabled={!hasTransfers}
+              className={`w-full text-left flex flex-col justify-between transition-all outline-none ${hasTransfers ? 'cursor-pointer hover:bg-emerald-500/10 active:scale-95' : 'cursor-default'} bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl relative overflow-hidden`}
+            >
+              <div className="w-full flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
+                    <TrendingUp size={10} className="mr-1" /> Ingresos Hoy
+                  </p>
+                  <p className="text-xl font-black text-emerald-400">
+                    ${formatNumber(dayIngresosEf + dayIngresosTr)}
+                  </p>
+                </div>
+                {hasTransfers && (
+                  <motion.div
+                    animate={{ rotate: isIngresosExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-1 text-emerald-500/50"
+                  >
+                    <ChevronDown size={18} />
+                  </motion.div>
+                )}
+              </div>
+              
+              <AnimatePresence>
+                {isIngresosExpanded && hasTransfers && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                    animate={{ height: 'auto', opacity: 1, marginTop: 16 }}
+                    exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                    className="w-full border-t border-emerald-500/10 pt-3 flex flex-col space-y-2 overflow-hidden"
+                  >
+                    <div className="flex justify-between items-center bg-slate-900/40 p-2 rounded-xl">
+                      <div className="flex items-center space-x-2">
+                        <Wallet size={12} className="text-emerald-500/70" />
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">Efectivo</span>
+                      </div>
+                      <span className="text-sm font-black text-emerald-300/80">${formatNumber(dayIngresosEf)}</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-slate-900/40 p-2 rounded-xl">
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp size={12} className="text-blue-500/70" />
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">Transferencia</span>
+                      </div>
+                      <span className="text-sm font-black text-blue-300/80">${formatNumber(dayIngresosTr)}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-amber-500/5 border border-amber-500/10 p-3.5 rounded-2xl">
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
+                  <Wallet size={10} className="mr-1" /> Fiados Hoy
+                </p>
+                <p className="text-lg font-black text-amber-400">
+                  ${formatNumber(selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && (m.tipo === 'venta' && m.cliente_id))
+                    .reduce((acc, m) => acc + Number(m.monto), 0))}
+                </p>
+              </div>
+              <div className="bg-rose-500/5 border border-rose-500/10 p-3.5 rounded-2xl">
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
+                  <TrendingDown size={10} className="mr-1" /> Gastos
+                </p>
+                <p className="text-lg font-black text-rose-400">
+                  ${formatNumber(selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate) && m.tipo === 'gasto')
+                    .reduce((acc, m) => acc + Number(m.monto), 0))}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -986,34 +1100,23 @@ const FinanceDashboard = () => {
             <div className="text-center sm:text-left">
               <p className="text-xs text-slate-500 font-medium uppercase tracking-widest mb-1">Balance Neto Real</p>
               <p className={`text-2xl font-black ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
-                  .reduce((acc, m) => {
-                    if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
-                    if (m.tipo === 'gasto') return acc - Number(m.monto);
-                    return acc;
-                  }, 0) >= 0
-                  ? 'text-emerald-400' : 'text-rose-400'
+                .reduce((acc, m) => {
+                  if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
+                  if (m.tipo === 'gasto') return acc - Number(m.monto);
+                  return acc;
+                }, 0) >= 0
+                ? 'text-emerald-400' : 'text-rose-400'
                 }`}>
-                ${selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
+                ${formatNumber(selectedDate && movements.filter(m => isSameDay(new Date(m.fecha), selectedDate))
                   .reduce((acc, m) => {
                     if ((m.tipo === 'venta' && !m.cliente_id) || m.tipo === 'abono') return acc + Number(m.monto);
                     if (m.tipo === 'gasto') return acc - Number(m.monto);
                     return acc;
-                  }, 0)
-                  .toLocaleString('es-ES')}
+                  }, 0))}
               </p>
             </div>
             <button
-              onClick={() => {
-                setEditingId(null);
-                setFormData({
-                  tipo: 'venta',
-                  monto: '',
-                  descripcion: '',
-                  fecha: format(selectedDate, 'yyyy-MM-dd'),
-                  productos: []
-                });
-                setShowModal(true);
-              }}
+              onClick={() => handleNew(selectedDate)}
               className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 font-bold"
             >
               <Plus size={20} />
@@ -1069,8 +1172,8 @@ const FinanceDashboard = () => {
         <button
           onClick={() => setFeedbackModal(null)}
           className={`w-full py-3 rounded-xl font-bold transition-all shadow-lg ${feedbackModal?.type === 'error'
-              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
-              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
+            ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
+            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
             }`}
         >
           Entendido
@@ -1102,7 +1205,7 @@ const FinanceDashboard = () => {
                   <span className="text-slate-200 text-sm font-medium">{p.nombre}</span>
                 </div>
                 <span className="text-slate-400 text-sm">
-                  ${(Number(p.cantidad) * Number(p.precio_unitario)).toLocaleString('es-ES')}
+                  ${formatNumber(Number(p.cantidad) * Number(p.precio_unitario))}
                 </span>
               </div>
             ))}
@@ -1111,7 +1214,7 @@ const FinanceDashboard = () => {
           <div className="mt-6 pt-5 border-t border-slate-700 flex justify-between items-center">
             <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Total Cobrado</span>
             <span className="text-2xl font-black text-emerald-400">
-              ${Number(selectedSale?.monto).toLocaleString('es-ES')}
+              ${formatNumber(selectedSale?.monto)}
             </span>
           </div>
         </div>
