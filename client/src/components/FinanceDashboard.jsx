@@ -159,7 +159,7 @@ const FinanceDashboard = () => {
     setEditingId(item.id);
     setFormData({
       tipo: item.tipo,
-      monto: item.monto,
+      monto: Math.floor(Number(item.monto)).toString(),
       descripcion: item.descripcion,
       fecha: new Date(item.fecha).toISOString().split('T')[0],
       metodo_pago: item.metodo_pago || 'Efectivo',

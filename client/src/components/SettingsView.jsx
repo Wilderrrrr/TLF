@@ -29,7 +29,7 @@ const SettingsView = () => {
     try {
       const res = await axios.get(API_BASE);
       setConfig(res.data.data);
-      setEditGoal(res.data.data.meta_mensual.toString());
+      setEditGoal(Math.floor(Number(res.data.data.meta_mensual)).toString());
       setLoading(false);
     } catch (error) {
       console.error('Error fetching settings:', error);
