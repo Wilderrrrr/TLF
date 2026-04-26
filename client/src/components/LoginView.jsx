@@ -51,7 +51,7 @@ const LoginView = () => {
             <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center font-bold text-3xl text-white shadow-lg shadow-blue-600/30 mb-4 transform rotate-3 hover:rotate-0 transition-transform">
               T
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">TLF Admin</h1>
+            <h1 className="text-2xl font-black text-white tracking-tight">The Lux Foster</h1>
             <p className="text-slate-400 text-sm mt-1">Ingresa tus credenciales para continuar</p>
           </div>
 

@@ -121,7 +121,7 @@ async function migrate() {
     // Usuario Admin por defecto
     await pool.query(`
       INSERT IGNORE INTO usuarios (nombre, usuario, email, password, rol) 
-      VALUES ('Administrador', 'admin', 'admin@tlf.com', '$2a$10$X7l.O/R1pD/N.7mG.W.C.eK.y5uV/X7l.O/R1pD/N.7mG.W.C.eK.y', 'admin')
+      VALUES ('Administrador', 'admin', 'admin@theluxfoster.com', '$2a$10$X7l.O/R1pD/N.7mG.W.C.eK.y5uV/X7l.O/R1pD/N.7mG.W.C.eK.y', 'admin')
     `);
     console.log('✅ Usuario admin inicial creado');
 

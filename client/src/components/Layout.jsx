@@ -55,7 +55,7 @@ const Layout = ({ children }) => {
         <div className="flex items-center justify-between mb-10 px-2 lg:justify-start">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl">T</div>
-            <h1 className="text-xl font-bold tracking-tight">TLF Admin</h1>
+            <h1 className="text-xl font-bold tracking-tight">The Lux Foster</h1>
           </div>
           <button 
             className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
@@ -148,7 +148,7 @@ const Layout = ({ children }) => {
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950/50 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-base">T</div>
-            <h1 className="text-lg font-bold tracking-tight">TLF Admin</h1>
+            <h1 className="text-lg font-bold tracking-tight">The Lux Foster</h1>
           </div>
           <button 
             className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"

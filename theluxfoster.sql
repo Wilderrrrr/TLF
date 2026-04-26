@@ -1,5 +1,5 @@
 -- ==========================================================
--- ESTRUCTURA PROFESIONAL DE BASE DE DATOS - TLF ADMIN
+-- ESTRUCTURA PROFESIONAL DE BASE DE DATOS - THE LUX FOSTER ADMIN
 -- ==========================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -104,7 +104,7 @@ INSERT INTO usuarios (nombre, usuario, email, password, rol)
 VALUES (
     'Administrador', 
     'admin', 
-    'admin@tlf.com', 
+    'admin@theluxfoster.com', 
     '$2b$10$PWIeFCjcIYzGBh/NAqPj6eST74Rv0m3b9E/5KuPLeXi3UvqGHUTjC', 
     'admin'
 );
