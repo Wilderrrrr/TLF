@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
@@ -72,6 +72,16 @@ const DashboardView = () => {
   useEffect(() => {
     fetchAnalytics();
   }, [range]);
+
+  // Optimización O(N) avanzada: Memorización de los máximos matemáticos
+  // Previene cálculos iterativos innecesarios en cada re-renderizado del componente
+  const maxGenTop = useMemo(() => {
+    return data?.distribution?.length ? Math.max(...data.distribution.map(d => Number(d.total_generado))) : 0;
+  }, [data?.distribution]);
+
+  const maxGenBottom = useMemo(() => {
+    return data?.bottomDistribution?.length ? Math.max(...data.bottomDistribution.map(d => Number(d.total_generado))) : 0;
+  }, [data?.bottomDistribution]);
 
   const exportData = () => {
     if (!data) return;
@@ -286,14 +296,26 @@ const DashboardView = () => {
                     <h3 className="text-xl font-bold text-white mb-1">Rendimiento</h3>
                     <p className="text-slate-500 text-xs">Análisis de rotación</p>
                 </div>
-                <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-1 flex w-full xl:w-auto">
+                <div 
+                    className="bg-slate-800/50 border border-slate-700 rounded-xl p-1 flex w-full xl:w-auto"
+                    role="tablist"
+                    aria-label="Métricas de Rotación"
+                >
                     <button 
+                        role="tab"
+                        aria-selected={productTab === 'top'}
+                        id="tab-top"
+                        aria-controls="panel-top"
                         onClick={() => setProductTab('top')} 
                         className={`flex-1 xl:flex-none whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${productTab === 'top' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
                     >
                         Más Vendidos
                     </button>
                     <button 
+                        role="tab"
+                        aria-selected={productTab === 'bottom'}
+                        id="tab-bottom"
+                        aria-controls="panel-bottom"
                         onClick={() => setProductTab('bottom')} 
                         className={`flex-1 xl:flex-none whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${productTab === 'bottom' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
                     >
@@ -304,10 +326,18 @@ const DashboardView = () => {
 
             <div className="flex-1 flex flex-col justify-center min-h-[250px]">
                 <AnimatePresence mode="wait">
-                    {productTab === 'top' && (() => {
-                        const maxGenTop = data?.distribution?.length ? Math.max(...data.distribution.map(d => Number(d.total_generado))) : 0;
-                        return (
-                        <motion.div key="top" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="space-y-5">
+                    {productTab === 'top' && (
+                        <motion.div 
+                            key="top" 
+                            id="panel-top"
+                            role="tabpanel"
+                            aria-labelledby="tab-top"
+                            initial={{opacity: 0, y: 10}} 
+                            animate={{opacity: 1, y: 0}} 
+                            exit={{opacity: 0, y: -10}} 
+                            transition={{ duration: 0.2 }} 
+                            className="space-y-5"
+                        >
                             {data?.distribution?.map((item, index) => {
                                 const percentage = maxGenTop > 0 ? (Number(item.total_generado) / maxGenTop) * 100 : 0;
                                 return (
@@ -336,13 +366,20 @@ const DashboardView = () => {
                                 </div>
                             )}
                         </motion.div>
-                        );
-                    })}
+                    )}
 
-                    {productTab === 'bottom' && (() => {
-                        const maxGenBottom = data?.bottomDistribution?.length ? Math.max(...data.bottomDistribution.map(d => Number(d.total_generado))) : 0;
-                        return (
-                        <motion.div key="bottom" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="space-y-5">
+                    {productTab === 'bottom' && (
+                        <motion.div 
+                            key="bottom" 
+                            id="panel-bottom"
+                            role="tabpanel"
+                            aria-labelledby="tab-bottom"
+                            initial={{opacity: 0, y: 10}} 
+                            animate={{opacity: 1, y: 0}} 
+                            exit={{opacity: 0, y: -10}} 
+                            transition={{ duration: 0.2 }} 
+                            className="space-y-5"
+                        >
                             {data?.bottomDistribution?.map((item, index) => {
                                 const percentage = maxGenBottom > 0 ? (Number(item.total_generado) / maxGenBottom) * 100 : 0;
                                 return (
@@ -370,8 +407,7 @@ const DashboardView = () => {
                                 </div>
                             )}
                         </motion.div>
-                        );
-                    })}
+                    )}
                 </AnimatePresence>
             </div>
         </div>
