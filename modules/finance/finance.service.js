@@ -139,12 +139,16 @@ exports.getPeriodicStats = async () => {
 
 exports.getDashboardAnalytics = async (days = 30) => {
     const timeSeries = await model.getAnalyticsData(days);
-    const distribution = await model.getProductsDistribution();
-    const stats = await model.getPeriodicStats();
+    const [distribution, bottomDistribution, stats] = await Promise.all([
+        model.getProductsDistribution(5, 'DESC'),
+        model.getProductsDistribution(5, 'ASC'),
+        model.getPeriodicStats()
+    ]);
     
     return {
         timeSeries,
         distribution,
+        bottomDistribution,
         stats
     };
 };

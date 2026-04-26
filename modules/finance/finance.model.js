@@ -91,7 +91,8 @@ exports.getAnalyticsData = async (days = 30) => {
   return rows;
 };
 
-exports.getProductsDistribution = async (limit = 5) => {
+exports.getProductsDistribution = async (limit = 5, order = 'DESC') => {
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     const query = `
         SELECT 
             p.nombre,
@@ -99,7 +100,7 @@ exports.getProductsDistribution = async (limit = 5) => {
         FROM venta_productos vp
         JOIN productos p ON vp.producto_id = p.id
         GROUP BY p.id, p.nombre
-        ORDER BY total_generado DESC
+        ORDER BY total_generado ${sortOrder}
         LIMIT ?
     `;
     const [rows] = await pool.query(query, [limit]);

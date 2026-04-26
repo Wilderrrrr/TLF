@@ -51,6 +51,7 @@ const DashboardView = () => {
   const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState(30);
+  const [productTab, setProductTab] = useState('top');
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -278,53 +279,101 @@ const DashboardView = () => {
         </div>
 
         {/* Product Distribution Chart */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl flex flex-col">
-          <h3 className="text-xl font-bold text-white mb-2">Top Productos</h3>
-          <p className="text-slate-500 text-xs mb-8">Distribución por generación de ingresos</p>
-          
-          <div className="flex-1 h-[250px] min-h-[250px] w-full mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data?.distribution || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={8}
-                  dataKey="total_generado"
-                  nameKey="nombre"
-                  animationDuration={1500}
-                >
-                  {data?.distribution?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={4} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                   contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
-                   itemStyle={{ color: '#fff', fontSize: '12px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+        {/* Product Performance Insights */}
+        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl flex flex-col h-full">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
+                <div>
+                    <h3 className="text-xl font-bold text-white mb-1">Rendimiento</h3>
+                    <p className="text-slate-500 text-xs">Análisis de rotación</p>
+                </div>
+                <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-1 flex w-full xl:w-auto">
+                    <button 
+                        onClick={() => setProductTab('top')} 
+                        className={`flex-1 xl:flex-none whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${productTab === 'top' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                    >
+                        Más Vendidos
+                    </button>
+                    <button 
+                        onClick={() => setProductTab('bottom')} 
+                        className={`flex-1 xl:flex-none whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${productTab === 'bottom' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                    >
+                        Baja Rotación
+                    </button>
+                </div>
+            </div>
 
-          <div className="space-y-3 mt-6">
-            {data?.distribution?.map((item, index) => (
-              <div key={item.nombre} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                  <span className="text-xs text-slate-300 font-medium">{item.nombre}</span>
-                </div>
-                <span className="text-xs font-bold text-white">${formatNumber(item.total_generado)}</span>
-              </div>
-            ))}
-            {(!data?.distribution || data.distribution.length === 0) && (
-                <div className="text-center py-4 text-slate-600 flex flex-col items-center">
-                    <AlertCircle size={32} className="mb-2 opacity-20" />
-                    <p className="text-xs">No hay datos de productos suficientes</p>
-                </div>
-            )}
-          </div>
+            <div className="flex-1 flex flex-col justify-center min-h-[250px]">
+                <AnimatePresence mode="wait">
+                    {productTab === 'top' && (() => {
+                        const maxGenTop = data?.distribution?.length ? Math.max(...data.distribution.map(d => Number(d.total_generado))) : 0;
+                        return (
+                        <motion.div key="top" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="space-y-5">
+                            {data?.distribution?.map((item, index) => {
+                                const percentage = maxGenTop > 0 ? (Number(item.total_generado) / maxGenTop) * 100 : 0;
+                                return (
+                                <div key={item.nombre} className="space-y-2 group">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{item.nombre}</span>
+                                        <span className="text-sm font-black text-white">${formatNumber(item.total_generado)}</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-slate-800/80 rounded-full overflow-hidden shadow-inner">
+                                        <motion.div 
+                                            initial={{ width: 0 }} 
+                                            animate={{ width: `${percentage}%` }} 
+                                            transition={{ duration: 1, ease: 'easeOut', delay: index * 0.1 }} 
+                                            className="h-full rounded-full relative" 
+                                            style={{ backgroundColor: COLORS[index % COLORS.length] }} 
+                                        >
+                                            <div className="absolute inset-0 bg-white/20 w-full h-full" style={{ mixBlendMode: 'overlay' }}></div>
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            )})}
+                            {(!data?.distribution || data.distribution.length === 0) && (
+                                <div className="text-center py-8 text-slate-600 flex flex-col items-center">
+                                    <AlertCircle size={32} className="mb-2 opacity-20" />
+                                    <p className="text-xs">No hay datos de productos suficientes</p>
+                                </div>
+                            )}
+                        </motion.div>
+                        );
+                    })}
+
+                    {productTab === 'bottom' && (() => {
+                        const maxGenBottom = data?.bottomDistribution?.length ? Math.max(...data.bottomDistribution.map(d => Number(d.total_generado))) : 0;
+                        return (
+                        <motion.div key="bottom" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="space-y-5">
+                            {data?.bottomDistribution?.map((item, index) => {
+                                const percentage = maxGenBottom > 0 ? (Number(item.total_generado) / maxGenBottom) * 100 : 0;
+                                return (
+                                <div key={item.nombre} className="space-y-2 group">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{item.nombre}</span>
+                                        <span className="text-sm font-black text-rose-400">${formatNumber(item.total_generado)}</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-slate-800/80 rounded-full overflow-hidden shadow-inner">
+                                        <motion.div 
+                                            initial={{ width: 0 }} 
+                                            animate={{ width: `${percentage}%` }} 
+                                            transition={{ duration: 1, ease: 'easeOut', delay: index * 0.1 }} 
+                                            className="h-full rounded-full bg-rose-500 relative" 
+                                        >
+                                            <div className="absolute inset-0 bg-white/20 w-full h-full" style={{ mixBlendMode: 'overlay' }}></div>
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            )})}
+                            {(!data?.bottomDistribution || data.bottomDistribution.length === 0) && (
+                                <div className="text-center py-8 text-slate-600 flex flex-col items-center">
+                                    <AlertCircle size={32} className="mb-2 opacity-20" />
+                                    <p className="text-xs">No hay datos de productos suficientes</p>
+                                </div>
+                            )}
+                        </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
+            </div>
         </div>
       </div>
 
