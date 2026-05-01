@@ -1,6 +1,7 @@
 const model = require('./finance.model');
 const pool = require('../../config/db');
 const productsService = require('../products/products.service');
+const dateUtils = require('../../utils/date');
 
 /**
  * Finance Business Logic Layer
@@ -133,16 +134,25 @@ exports.getSummary = async () => {
   return await model.getDailySummary();
 };
 
+/**
+ * Helper para obtener la fecha actual en la zona horaria del usuario
+ */
+const getUserToday = () => {
+  return dateUtils.getToday();
+};
+
 exports.getPeriodicStats = async () => {
-  return await model.getPeriodicStats();
+  const today = getUserToday();
+  return await model.getPeriodicStats(today);
 };
 
 exports.getDashboardAnalytics = async (days = 30) => {
-    const timeSeries = await model.getAnalyticsData(days);
+    const today = getUserToday();
+    const timeSeries = await model.getAnalyticsData(days, today);
     const [distribution, bottomDistribution, stats] = await Promise.all([
         model.getProductsDistribution(5, 'DESC'),
         model.getProductsDistribution(5, 'ASC'),
-        model.getPeriodicStats()
+        model.getPeriodicStats(today)
     ]);
     
     return {

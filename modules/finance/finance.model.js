@@ -52,42 +52,42 @@ exports.remove = async (id) => {
   return true;
 };
 
-exports.getPeriodicStats = async () => {
+exports.getPeriodicStats = async (today) => {
   const query = `
     SELECT 
       -- Mes Actual
-      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND MONTH(fecha) = MONTH(CURRENT_DATE) AND YEAR(fecha) = YEAR(CURRENT_DATE) THEN monto ELSE 0 END) as mes_ventas,
-      SUM(CASE WHEN tipo = 'gasto' AND MONTH(fecha) = MONTH(CURRENT_DATE) AND YEAR(fecha) = YEAR(CURRENT_DATE) THEN monto ELSE 0 END) as mes_gastos,
+      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND MONTH(fecha) = MONTH(?) AND YEAR(fecha) = YEAR(?) THEN monto ELSE 0 END) as mes_ventas,
+      SUM(CASE WHEN tipo = 'gasto' AND MONTH(fecha) = MONTH(?) AND YEAR(fecha) = YEAR(?) THEN monto ELSE 0 END) as mes_gastos,
       
       -- Mes Anterior
-      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND MONTH(fecha) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)) AND YEAR(fecha) = YEAR(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)) THEN monto ELSE 0 END) as mes_ventas_anterior,
-      SUM(CASE WHEN tipo = 'gasto' AND MONTH(fecha) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)) AND YEAR(fecha) = YEAR(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)) THEN monto ELSE 0 END) as mes_gastos_anterior,
+      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND MONTH(fecha) = MONTH(DATE_SUB(?, INTERVAL 1 MONTH)) AND YEAR(fecha) = YEAR(DATE_SUB(?, INTERVAL 1 MONTH)) THEN monto ELSE 0 END) as mes_ventas_anterior,
+      SUM(CASE WHEN tipo = 'gasto' AND MONTH(fecha) = MONTH(DATE_SUB(?, INTERVAL 1 MONTH)) AND YEAR(fecha) = YEAR(DATE_SUB(?, INTERVAL 1 MONTH)) THEN monto ELSE 0 END) as mes_gastos_anterior,
 
       -- Semana Actual (Últimos 7 días)
-      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND fecha >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_ventas,
-      SUM(CASE WHEN tipo = 'gasto' AND fecha >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_gastos,
+      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND fecha >= DATE_SUB(?, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_ventas,
+      SUM(CASE WHEN tipo = 'gasto' AND fecha >= DATE_SUB(?, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_gastos,
 
       -- Semana Anterior (7 a 14 días atrás)
-      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND fecha >= DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY) AND fecha < DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_ventas_anterior,
-      SUM(CASE WHEN tipo = 'gasto' AND fecha >= DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY) AND fecha < DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_gastos_anterior
+      SUM(CASE WHEN ((tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono') AND fecha >= DATE_SUB(?, INTERVAL 14 DAY) AND fecha < DATE_SUB(?, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_ventas_anterior,
+      SUM(CASE WHEN tipo = 'gasto' AND fecha >= DATE_SUB(?, INTERVAL 14 DAY) AND fecha < DATE_SUB(?, INTERVAL 7 DAY) THEN monto ELSE 0 END) as semana_gastos_anterior
     FROM movimientos;
   `;
-  const [rows] = await pool.query(query);
+  const [rows] = await pool.query(query, [today, today, today, today, today, today, today, today, today, today, today, today, today, today]);
   return rows[0];
 };
 
-exports.getAnalyticsData = async (days = 30) => {
+exports.getAnalyticsData = async (days = 30, today) => {
   const query = `
     SELECT 
       fecha,
       SUM(CASE WHEN (tipo = 'venta' AND cliente_id IS NULL) OR tipo = 'abono' THEN monto ELSE 0 END) as ingresos,
       SUM(CASE WHEN tipo = 'gasto' THEN monto ELSE 0 END) as egresos
     FROM movimientos
-    WHERE fecha >= DATE_SUB(CURRENT_DATE, INTERVAL ? DAY)
+    WHERE fecha >= DATE_SUB(?, INTERVAL ? DAY)
     GROUP BY fecha
     ORDER BY fecha ASC
   `;
-  const [rows] = await pool.query(query, [days]);
+  const [rows] = await pool.query(query, [today, days]);
   return rows;
 };
 

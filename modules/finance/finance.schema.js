@@ -1,5 +1,7 @@
 const Joi = require('joi');
 
+const dateUtils = require('../../utils/date');
+
 /**
  * Finance Validation Schemas
  */
@@ -17,7 +19,7 @@ const movimientoSchema = Joi.object({
   descripcion: Joi.string().max(255).allow('').messages({
     'string.max': 'La descripción no puede pasar los 255 caracteres',
   }),
-  fecha: Joi.date().iso().default(() => new Date().toISOString().split('T')[0]).messages({
+  fecha: Joi.date().iso().default(() => dateUtils.getToday()).messages({
     'date.format': 'La fecha debe tener un formato válido (YYYY-MM-DD)',
   }),
   cliente_id: Joi.number().allow(null).optional(),

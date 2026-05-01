@@ -11,6 +11,7 @@ const settingsRoutes = require('./modules/settings/settings.routes');
 const productsRoutes = require('./modules/products/products.routes');
 const usersRoutes = require('./modules/users/users.routes');
 const clientsRoutes = require('./modules/clients/clients.routes');
+const dateUtils = require('./utils/date');
 
 const app = express();
 
@@ -35,7 +36,12 @@ app.use('/api/clients', authMiddleware, clientsRoutes);
 
 // Ruta de salud (Health Check)
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date(),
+    timezone: dateUtils.TIMEZONE,
+    today: dateUtils.getToday()
+  });
 });
 
 // Servir archivos estáticos del Cliente (React) en producción
