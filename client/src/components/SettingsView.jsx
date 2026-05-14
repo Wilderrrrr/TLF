@@ -95,7 +95,7 @@ const SettingsView = () => {
       </AnimatePresence>
 
       {/* Sección de Meta Mensual */}
-      <section className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl">
+      <section className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 rounded-3xl transform-gpu">
         <div className="flex items-center space-x-3 mb-6">
           <div className="p-2 bg-blue-600/20 rounded-lg text-blue-400">
             <Target size={24} />
@@ -126,7 +126,7 @@ const SettingsView = () => {
       </section>
 
       {/* Sección de Gastos Fijos */}
-      <section className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl">
+      <section className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 rounded-3xl transform-gpu">
         <div className="flex items-center space-x-3 mb-6">
           <div className="p-2 bg-rose-600/20 rounded-lg text-rose-400">
             <Plus size={24} />

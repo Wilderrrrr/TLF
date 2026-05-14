@@ -32,7 +32,7 @@ const capitalize = (str) => {
 };
 
 const StatCard = ({ title, amount, icon: Icon, color, subtitle, trend }) => (
-  <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl hover:border-slate-700 transition-all duration-300 group flex flex-row md:flex-col h-full items-center md:items-start relative overflow-hidden">
+  <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-4 md:p-6 rounded-2xl hover:border-slate-700 transition-all duration-300 group flex flex-row md:flex-col h-full items-center md:items-start relative overflow-hidden transform-gpu">
     {/* Trend Badge - Top Right Always */}
     {trend !== undefined && (
       <div className="absolute top-4 right-4 z-10">
@@ -433,7 +433,7 @@ const FinanceDashboard = () => {
   return (
     <div className="space-y-8">
       {/* Sección de Meta y Progreso */}
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-5 md:p-8 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8">
+      <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-5 md:p-8 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8 transform-gpu">
         <div className="space-y-1 md:space-y-2">
           <h3 className="text-lg md:text-xl font-bold text-white flex items-center space-x-2">
             <CheckCircle className="text-blue-500" size={18} />
@@ -1025,7 +1025,7 @@ const FinanceDashboard = () => {
               type="button"
               onClick={() => hasTransfers && setIsIngresosExpanded(!isIngresosExpanded)}
               disabled={!hasTransfers}
-              className={`w-full text-left flex flex-col justify-between transition-all outline-none ${hasTransfers ? 'cursor-pointer hover:bg-emerald-500/10 active:scale-95' : 'cursor-default'} bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl relative overflow-hidden`}
+              className={`w-full text-left flex flex-col justify-between transition-all outline-none ${hasTransfers ? 'cursor-pointer hover:bg-emerald-500/10 active:scale-95' : 'cursor-default'} bg-emerald-500/[0.08] border border-emerald-500/20 p-4 rounded-2xl relative overflow-hidden transform-gpu`}
             >
               <div className="w-full flex justify-between items-start">
                 <div>
@@ -1075,7 +1075,7 @@ const FinanceDashboard = () => {
             </button>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-amber-500/5 border border-amber-500/10 p-3.5 rounded-2xl">
+              <div className="bg-amber-500/[0.08] border border-amber-500/20 p-3.5 rounded-2xl transform-gpu">
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
                   <Wallet size={10} className="mr-1" /> Fiados Hoy
                 </p>
@@ -1084,7 +1084,7 @@ const FinanceDashboard = () => {
                     .reduce((acc, m) => acc + Number(m.monto), 0))}
                 </p>
               </div>
-              <div className="bg-rose-500/5 border border-rose-500/10 p-3.5 rounded-2xl">
+              <div className="bg-rose-500/[0.08] border border-rose-500/20 p-3.5 rounded-2xl transform-gpu">
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center">
                   <TrendingDown size={10} className="mr-1" /> Gastos
                 </p>

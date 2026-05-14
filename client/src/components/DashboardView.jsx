@@ -20,8 +20,9 @@ const StatCard = ({ title, value, subValue, icon: Icon, trend, color }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl"
+    className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl transform-gpu"
   >
+
     <div className="flex justify-between items-start mb-2 md:mb-4">
       <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl ${color} bg-opacity-10 text-${color.split('-')[1]}-400 shadow-inner`}>
         <Icon size={20} className="md:w-6 md:h-6" />
@@ -218,7 +219,7 @@ const DashboardView = () => {
       {/* Main Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Revenue Area Chart */}
-        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl">
+        <div className="lg:col-span-2 bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 rounded-3xl transform-gpu">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xl font-bold text-white">Análisis de Flujo de Caja</h3>
             <div className="flex items-center space-x-4">
@@ -290,7 +291,7 @@ const DashboardView = () => {
 
         {/* Product Distribution Chart */}
         {/* Product Performance Insights */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl flex flex-col h-full">
+        <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 rounded-3xl flex flex-col h-full transform-gpu">
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
                 <div>
                     <h3 className="text-xl font-bold text-white mb-1">Rendimiento</h3>
@@ -414,7 +415,7 @@ const DashboardView = () => {
       </div>
 
       {/* Reports & Summary Section */}
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl">
+      <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 rounded-3xl transform-gpu">
         <div className="flex items-center justify-between mb-8">
             <div>
                 <h3 className="text-xl font-bold text-white mb-1 tracking-tight">Reporte Operativo</h3>

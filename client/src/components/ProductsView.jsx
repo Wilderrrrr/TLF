@@ -13,7 +13,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
   const isLowStock = manejaStock && product.stock_minimo !== null && product.stock <= product.stock_minimo;
 
   return (
-    <div className={`bg-slate-900/40 backdrop-blur-md border rounded-2xl transition-all group relative overflow-hidden ${isLowStock ? 'border-amber-500/50 shadow-lg shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'}`}>
+    <div className={`bg-slate-900/80 backdrop-blur-sm border rounded-2xl transition-all group relative overflow-hidden transform-gpu ${isLowStock ? 'border-amber-500/50 shadow-lg shadow-amber-500/5' : 'border-slate-800 hover:border-slate-700'}`}>
       
       {isLowStock && (
         <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 bg-amber-500/10 blur-2xl rounded-full" />
@@ -194,7 +194,7 @@ const ProductsView = () => {
   return (
     <div className="space-y-8">
       {/* Header & Search */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-900/50 backdrop-blur-md border border-slate-800 p-5 md:p-6 rounded-2xl md:rounded-3xl">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-5 md:p-6 rounded-2xl md:rounded-3xl transform-gpu">
         <div className="relative flex-1 w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
           <input

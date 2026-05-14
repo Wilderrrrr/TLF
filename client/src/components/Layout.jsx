@@ -51,7 +51,7 @@ const Layout = ({ children }) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-950/95 lg:bg-slate-950/50 backdrop-blur-xl border-r border-slate-800 p-6 flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-950/95 lg:bg-slate-950/80 backdrop-blur-sm border-r border-slate-800 p-6 flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 transform-gpu ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between mb-10 px-2 lg:justify-start">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl">T</div>
@@ -145,7 +145,7 @@ const Layout = ({ children }) => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 lg:ml-64 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 transition-all duration-300">
         {/* Mobile Header Topbar */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950/50 backdrop-blur-md sticky top-0 z-30">
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-30 transform-gpu">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-base">T</div>
             <h1 className="text-lg font-bold tracking-tight">The Lux Foster</h1>

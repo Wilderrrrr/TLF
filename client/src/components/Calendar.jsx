@@ -108,7 +108,7 @@ const Calendar = ({ movements, onDateClick }) => {
   };
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl h-full flex flex-col">
+    <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-4 md:p-6 rounded-2xl md:rounded-3xl h-full flex flex-col transform-gpu">
       {renderHeader()}
       {renderDays()}
       <div className="flex-1">

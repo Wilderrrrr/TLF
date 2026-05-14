@@ -116,7 +116,7 @@ const UsersView = () => {
     <div className="space-y-8">
       {/* Header section with Stats or Count */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-3xl">
+        <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-6 rounded-3xl transform-gpu">
             <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-400">
                     <User size={24} />
@@ -127,7 +127,7 @@ const UsersView = () => {
                 </div>
             </div>
         </div>
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-3xl">
+        <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-6 rounded-3xl transform-gpu">
             <div className="flex items-center space-x-4">
                 <div className="p-3 bg-emerald-600/10 rounded-2xl text-emerald-400">
                     <Shield size={24} />
@@ -138,7 +138,7 @@ const UsersView = () => {
                 </div>
             </div>
         </div>
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-3xl">
+        <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-6 rounded-3xl transform-gpu">
             <div className="flex items-center space-x-4">
                 <div className="p-3 bg-amber-600/10 rounded-2xl text-amber-400">
                     <CheckCircle size={24} />
@@ -151,7 +151,7 @@ const UsersView = () => {
         </div>
       </div>
 
-      <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-3xl overflow-hidden shadow-2xl transform-gpu">
         <div className="p-6 border-b border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center space-x-4 w-full md:w-auto">
             <h3 className="text-xl font-bold text-white whitespace-nowrap">Gestión de Acceso</h3>

@@ -44,7 +44,7 @@ const Modal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className={`fixed inset-0 ${zIndex} bg-slate-950/80 ${blurBackdrop ? 'backdrop-blur-sm' : ''} pointer-events-auto`}
+          className={`fixed inset-0 ${zIndex} bg-slate-950/90 ${blurBackdrop ? 'backdrop-blur-[2px]' : ''} pointer-events-auto transition-opacity duration-300`}
         />,
         // Modal Container Wrapper
         <motion.div
@@ -56,8 +56,9 @@ const Modal = ({
           className={`fixed inset-0 ${zIndex} pointer-events-none flex items-center justify-center p-4`}
         >
           <div
-            className={`pointer-events-auto relative bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl w-[95%] md:w-full ${maxWidth} shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar`}
+            className={`pointer-events-auto relative bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl w-[95%] md:w-full ${maxWidth} shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar transform-gpu`}
           >
+
             {children}
           </div>
         </motion.div>
