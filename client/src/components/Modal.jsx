@@ -58,7 +58,6 @@ const Modal = ({
           <div
             className={`pointer-events-auto relative bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl w-[95%] md:w-full ${maxWidth} shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar transform-gpu`}
           >
-
             {children}
           </div>
         </motion.div>
