@@ -6,16 +6,6 @@ async function migrate() {
   try {
     console.log('🚀 Iniciando migración de base de datos...');
     
-    // Crear tablas de gastos fijos
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS gastos_fijos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        descripcion VARCHAR(255) NOT NULL,
-        monto DECIMAL(10, 2) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    console.log('✅ Tabla gastos_fijos lista');
 
     // Crear tabla de configuración
     await pool.query(`

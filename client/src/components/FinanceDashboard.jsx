@@ -74,7 +74,7 @@ const FinanceDashboard = () => {
   const [movements, setMovements] = useState([]);
   const [summary, setSummary] = useState([]);
   const [stats, setStats] = useState(null);
-  const [config, setConfig] = useState({ meta_mensual: 10000, total_gastos_fijos: 0 });
+  const [config, setConfig] = useState({ meta_mensual: 10000 });
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // ID del movimiento a borrar
@@ -394,11 +394,11 @@ const FinanceDashboard = () => {
   const monthVentasAnt = Number(stats?.mes_ventas_anterior || 0);
   const monthGastosAnt = Number(stats?.mes_gastos_anterior || 0);
 
-  const realBalance = monthVentas - monthGastos - config.total_gastos_fijos;
-  const prevRealBalance = monthVentasAnt - monthGastosAnt - config.total_gastos_fijos;
+  const realBalance = monthVentas - monthGastos;
+  const prevRealBalance = monthVentasAnt - monthGastosAnt;
 
   const trendVentas = calculateTrend(monthVentas, monthVentasAnt);
-  const trendGastos = calculateTrend(monthGastos + config.total_gastos_fijos, monthGastosAnt + config.total_gastos_fijos);
+  const trendGastos = calculateTrend(monthGastos, monthGastosAnt);
   const trendUtilidad = calculateTrend(realBalance, prevRealBalance);
 
   const progressPercent = Math.min(Math.round((monthVentas / config.meta_mensual) * 100), 100);
@@ -473,7 +473,7 @@ const FinanceDashboard = () => {
       </div>
 
       {/* Resumen Periódico */}
-      <StatsBar stats={stats} totalFixed={config.total_gastos_fijos} />
+      <StatsBar stats={stats} />
 
       {/* Vista de Calendario y Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -494,10 +494,10 @@ const FinanceDashboard = () => {
           <div className="flex-1">
             <StatCard
               title="Gastos Totales"
-              amount={monthGastos + config.total_gastos_fijos}
+              amount={monthGastos}
               icon={TrendingDown}
               color="bg-rose-500"
-              subtitle={`Variables: $${formatNumber(monthGastos)} | Fijos: $${formatNumber(config.total_gastos_fijos)}`}
+              subtitle={`Gastos del mes actual`}
               trend={trendGastos}
             />
           </div>

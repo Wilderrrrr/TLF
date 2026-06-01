@@ -21,7 +21,7 @@ const StatItem = ({ label, value, icon: Icon, color, trend }) => (
   </div>
 );
 
-const StatsBar = ({ stats, totalFixed = 0 }) => {
+const StatsBar = ({ stats }) => {
   if (!stats) return null;
 
   const calculateTrend = (current, previous) => {
@@ -32,8 +32,8 @@ const StatsBar = ({ stats, totalFixed = 0 }) => {
   const trendVentasMes = calculateTrend(Number(stats.mes_ventas), Number(stats.mes_ventas_anterior));
   const trendVentasSemana = calculateTrend(Number(stats.semana_ventas), Number(stats.semana_ventas_anterior));
 
-  const totalMonthGastos = Number(stats.mes_gastos || 0) + Number(totalFixed);
-  const prevMonthGastosTotal = Number(stats.mes_gastos_anterior || 0) + Number(totalFixed);
+  const totalMonthGastos = Number(stats.mes_gastos || 0);
+  const prevMonthGastosTotal = Number(stats.mes_gastos_anterior || 0);
   const trendGastosMes = calculateTrend(totalMonthGastos, prevMonthGastosTotal);
 
   return (

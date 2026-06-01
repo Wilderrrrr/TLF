@@ -19,21 +19,3 @@ exports.updateGoal = async (req, res, next) => {
     next(error);
   }
 };
-
-exports.addFixedExpense = async (req, res, next) => {
-  try {
-    const expense = await service.addFixedExpense(req.body);
-    response.success(res, 'Gasto fijo agregado', expense);
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.deleteFixedExpense = async (req, res, next) => {
-  try {
-    await service.deleteFixedExpense(req.params.id);
-    response.success(res, 'Gasto fijo eliminado');
-  } catch (error) {
-    next(error);
-  }
-};

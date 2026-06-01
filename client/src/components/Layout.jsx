@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Receipt, Settings, LogOut, Package, Menu, X, Users, UserSquare2, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Receipt, LogOut, Package, Menu, X, Users, UserSquare2, BarChart3 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/AuthContext';
 
@@ -29,8 +29,7 @@ const Layout = ({ children }) => {
     '/finanzas': 'finance',
     '/productos': 'products',
     '/usuarios': 'users',
-    '/clientes': 'clients',
-    '/ajustes': 'settings'
+    '/clientes': 'clients'
   };
 
   const activeTab = pathMatch[location.pathname] || 'dashboard';
@@ -121,12 +120,6 @@ const Layout = ({ children }) => {
                 label="Usuarios"
                 active={activeTab === 'users'}
                 onClick={() => handleTabChange('/usuarios')}
-              />
-              <SidebarItem
-                icon={Settings}
-                label="Configuración"
-                active={activeTab === 'settings'}
-                onClick={() => handleTabChange('/ajustes')}
               />
             </div>
           </div>

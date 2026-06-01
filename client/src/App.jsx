@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import FinanceDashboard from './components/FinanceDashboard';
-import SettingsView from './components/SettingsView';
 import ProductsView from './components/ProductsView';
 import UsersView from './components/UsersView';
 import DashboardView from './components/DashboardView';
@@ -36,7 +35,6 @@ function App() {
           <Route path="/productos" element={<ProtectedRoute><ProductsView /></ProtectedRoute>} />
           <Route path="/usuarios" element={<ProtectedRoute><UsersView /></ProtectedRoute>} />
           <Route path="/clientes" element={<ProtectedRoute><ClientsView /></ProtectedRoute>} />
-          <Route path="/ajustes" element={<ProtectedRoute><SettingsView /></ProtectedRoute>} />
           
           {/* Redirección automática */}
           <Route path="*" element={<Navigate to="/" replace />} />
