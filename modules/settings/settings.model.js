@@ -17,7 +17,7 @@ exports.getGoal = async () => {
     [today, today]
   );
   const currentMonthExpenses = rows[0] && rows[0].total_gastos ? parseFloat(rows[0].total_gastos) : 0;
-  return 2000000 + (3 * currentMonthExpenses);
+  return 2 * currentMonthExpenses;
 };
 
 exports.updateGoal = async (newGoal) => {
